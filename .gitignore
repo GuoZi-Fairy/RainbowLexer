@@ -1,6 +1,6 @@
 # Prerequisites
 *.d
-
+.VSCodeCounter.*
 # Object files
 *.o
 *.ko

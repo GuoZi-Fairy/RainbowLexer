@@ -12,8 +12,15 @@ typedef struct RainbowStatusLine
     struct RainbowStatusLine *table;//链表
     struct RainbowStatusLine *Next;
 }rStatu;
+typedef struct RainbowError
+{
+    char* errorMsg;
+    char* errorDoc;
+}RainbowError;
+static RainbowError repeatedErr = {"Repeated tokenRule","Repeated token ->"};
+#define RAINBOW_RAISE(ERROR) printf("ERROR:\n[%s]:%s\n",ERROR.errorMsg,ERROR.errorDoc);
 static size_t RainBowLexer_id;
-
+static char* TokenRule_Now;
 RainbowLexerPrivate(rStatu*) StatuLineTable(int initCh) //从返回hash表中索引为initCh的状态链
 {
 
@@ -57,19 +64,22 @@ RainbowLexerPrivate(void) RainbowStatuLineParse(rStatu** statu,const char* token
             statu = &((*statu)->Next);
     }
     rStatu** lastestStatu = NULL;
-    if(*token == '\0' && (*statu) == NULL)printf("重复的词!");
+    if(*token == '\0' && (*statu) == NULL)
+    {
+        RAINBOW_RAISE(repeatedErr);
+        printf("%s of id:%lld\n",TokenRule_Now,RainBowLexer_id);
+        return;
+    }
     while(*token != '\0')
     {
         *statu = (rStatu*)malloc(sizeof(rStatu));
         lastestStatu = statu;
-        printf("加入状态%c\n",*token);
         (*statu)->initChar = *token++;
         (*statu)->Next = NULL;
         statu = &((*statu)->table);
         *statu = NULL;
     }
     (*lastestStatu)->id = RainBowLexer_id++;
-    printf("该词编号为%lld\n",(*lastestStatu)->id);
 }
 #define STATULINE_INIT(statuLine,ch) {\
     statuLine->initChar = ch;\
@@ -83,7 +93,7 @@ RainbowLexerPrivate(void) RainbowCreateStatusLine(const char* token) //将静态
     if (!cheekStatusLine(*parser)) STATULINE_INIT(statuLine,*parser);
     RainbowStatuLineParse(&(statuLine->table),parser+1);
 }
-RainbowLexerPublish(void) RainbowStatusBuild(const char* RuleContent)//从规则描述中解析状态机
+RainbowLexerPublish(void) RainbowStatusBuild(const char* RuleContent)//从规则描述中解析状态机 
 {
     const char* lexer = RuleContent;
     while (*lexer!='\0')
@@ -102,12 +112,13 @@ RainbowLexerPrivate(void) RainbowStatusShowLine(rStatu* statu,size_t deep)
         putchar('|');\
         for (size_t i = 0; i < DEEP; i++) putchar(' ');\
         putchar(' ');\
-        putchar('-');\
+        putchar('|');\
         putchar('-');\
         putchar(CH);\
         putchar('\n');\
         putchar('|');\
         for (size_t i = 0; i < DEEP; i++) putchar(' ');\
+        putchar(' ');\
         putchar(' ');\
         putchar('|');\
         putchar('\n');\
@@ -134,10 +145,13 @@ RainbowLexerPrivate(void) RainbowStatusShowRule()
 int main(int argc, char const *argv[])
 {
     SetConsoleOutputCP(65001);
-    RainbowCreateStatusLine("helloWolrd1");
-    RainbowCreateStatusLine("helloWolrd2");
-    RainbowCreateStatusLine("helloWolrd3");
-    RainbowCreateStatusLine("helloWolrd4");
+    RainbowCreateStatusLine("World4");
+    RainbowCreateStatusLine("INT32");
+    RainbowCreateStatusLine("INT64");
+    RainbowCreateStatusLine("FLOAT32");
+    RainbowCreateStatusLine("FLOAT64");
+    RainbowCreateStatusLine("FOR");
+    RainbowCreateStatusLine("WHILE");
     RainbowStatusShowRule();
     return 0;
 }
