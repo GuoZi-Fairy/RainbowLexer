@@ -142,6 +142,72 @@ RainbowLexerPrivate(void) RainbowStatusShowRule()
     for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
         if(cheekStatusLine(i))RainbowStatusShowLine(StatuLineTable(i),0);
 }
+
+
+/*
+    实体的状态机**
+*/
+RainbowLexerPrivate(int) GetStatusOfNum(char ch)
+{
+    switch (ch)
+    {
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+        return 4;
+        break;
+    case '-':
+    case '+':
+        return 1;
+        break;
+    case ' ':
+        return 0;
+        break;
+    case '.':
+        return 2;
+        break;
+    case 'e':
+    case 'E':
+        return 3;
+        break;
+    case '\0':
+        return 6;
+        break;
+    default:
+        return 5;
+        break;
+    }
+}
+RainbowLexerPrivate(int) RainbowStatusCheekNumValidity(const char* token)//用于检查一个字符串是否为合法数字表示
+{
+
+    static int numStatuGra[10][7] = {//-1为否 -2为小数  -3为整数 -4为科学计数
+      //blank signal  .  e  0 alphabet end
+        {0 ,     1 ,  2,-1, 8,   -1   , -1},//begin:0
+        {-1,     -1,  2,-1, 8,   -1   , -1},//Signal:1
+        {-1,     -1, -1,-1, 9,   -1   , -1},//Dot [before num]:2
+        {-1,     -1,  4, 5, 3,   -1   , -4},//number[before E]:3
+        { 7,     -1, -1, 5, 9,   -1   , -2},//Dot [after num]:4
+        {-1,      1, -1,-1, 6,   -1   , -1},//e:5
+        { 7,     -1, -1,-1, 6,   -1   , -4},//number[after e]:6
+        { 7,     -1, -1,-1,-1,   -1   , -5},//blank:7
+        { 7,     -1,  9, 5, 8,   -1   , -3},//number[before dot]:8
+        { 7,     -1, -1, 5, 9,   -1   , -2}//number[after dot]:9
+    };
+    int status = numStatuGra[0][GetStatusOfNum(*token++)];
+    while (status > 0)
+    {
+        status = numStatuGra[status][GetStatusOfNum(*token++)];
+    }
+    return status;
+}
 int main(int argc, char const *argv[])
 {
     SetConsoleOutputCP(65001);
