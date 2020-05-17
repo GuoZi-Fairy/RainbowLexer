@@ -145,8 +145,9 @@ RainbowLexerPrivate(void) RainbowStatusShowRule()
 
 
 /*
-    实体的状态机**
+    静态实体的状态机** [数字检验 , 变量名检验]
 */
+
 RainbowLexerPrivate(int) GetStatusOfNum(char ch)
 {
     switch (ch)
@@ -202,11 +203,51 @@ RainbowLexerPrivate(int) RainbowStatusCheekNumValidity(const char* token)//用�
         { 7,     -1, -1, 5, 9,   -1   , -2}//number[after dot]:9
     };
     int status = numStatuGra[0][GetStatusOfNum(*token++)];
-    while (status > 0)
+    while (status >= 0)
     {
         status = numStatuGra[status][GetStatusOfNum(*token++)];
     }
     return status;
+}
+RainbowLexerPrivate(int) GetStatusOfVarName(char ch)
+{
+    if (ch>='0'&&ch<='9')return 2;
+    else if ((ch>='a'&&ch<='z')||(ch=='_'))return 1;
+    else if (ch == ' ')return 0;
+    else if (ch == '\0')return 3;
+    else return 4;
+}
+RainbowLexerPrivate(int) RainbowStatusCheekVarNameValidity(const char* token)
+{
+    static int varNameStatus[4][5] = 
+    {//whitespace , ch , num , end  undefine
+        { 0       ,  1 ,  -1  ,  -1 , -1},//start : 0
+        { 3       ,  1 ,   2  ,  -2 , -1},//ch : 1
+        { 3       ,  1 ,   2  ,  -2 , -1},//num:2
+        { 3       , -1 ,  -1  ,  -2 , -1},//whitespace : 3
+    };
+    int status = varNameStatus[0][GetStatusOfVarName(*token++)];
+    while (status >= 0)
+    {
+        status = varNameStatus[status][GetStatusOfVarName(*token++)];
+    }
+    return status;
+}
+#define WHITESPACE_SKIP(str) {while(*str==' ')str++;}
+RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValidity(const char* token)
+{
+    WHITESPACE_SKIP(token);
+    if (!cheekStatusLine(*token)) return -1;
+    rStatu* StatuLine = StatuLineTable(*token++);
+    recursive_token:
+        StatuLine = StatuLine->table;
+        while (StatuLine->initChar != *token && StatuLine->Next != NULL) StatuLine = StatuLine->Next;
+        if(StatuLine->Next == NULL && StatuLine->initChar != *token)return -1;
+        else if(StatuLine->table == NULL && *(token+1) =='\0')return StatuLine->id;
+        else if(StatuLine->table != NULL && *(token+1) =='\0')return -1;
+        else if(StatuLine->table == NULL && *(token+1) !='\0')return -1;
+        token++;
+    goto recursive_token;
 }
 int main(int argc, char const *argv[])
 {
@@ -218,6 +259,21 @@ int main(int argc, char const *argv[])
     RainbowCreateStatusLine("FLOAT64");
     RainbowCreateStatusLine("FOR");
     RainbowCreateStatusLine("WHILE");
-    RainbowStatusShowRule();
+    // RainbowStatusShowRule();
+
+    /* Test of NumValidity
+    // char* test = "12315";
+    // printf("%s is %d",test,RainbowStatusCheekNumValidity(test));
+    */
+
+    /* Test of varNameValidity
+    // char* test = "__safa_124fafg_adsdg";
+    // printf("%s is %d",test,RainbowStatusCheekVarNameValidity(test));
+    */
+
+    /* Test of StaticWordValidity
+    // char* test = "WHILE";
+    // printf("%s is %d",test,RainbowStatusCheekOfStaticWordValidity(test));
+    */
     return 0;
 }
