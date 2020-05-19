@@ -1,17 +1,18 @@
 # Details
 
-Date : 2020-05-14 00:38:53
+Date : 2020-05-19 20:30:17
 
 Directory d:\projects\RainbowLexer
 
-Total : 3 files,  151 codes, 4 comments, 7 blanks, all 162 lines
+Total : 4 files,  549 codes, 42 comments, 26 blanks, all 617 lines
 
 [summary](results.md)
 
 ## Files
 | filename | language | code | comment | blank | total |
 | :--- | :--- | ---: | ---: | ---: | ---: |
-| [RainbowLexer.c](/RainbowLexer.c) | C | 134 | 4 | 6 | 144 |
+| [README.md](/README.md) | Markdown | 93 | 0 | 8 | 101 |
+| [RainbowLexer.c](/RainbowLexer.c) | C | 439 | 42 | 17 | 498 |
 | [RainbowLexer.h](/RainbowLexer.h) | C++ | 5 | 0 | 0 | 5 |
 | [test.c](/test.c) | C | 12 | 0 | 1 | 13 |
 
