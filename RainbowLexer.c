@@ -250,9 +250,10 @@ RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValiditySp(const char* to
         若合法则返回对应id
         若不合法则返回-1 
     */
-    WHITESPACE_SKIP(token);
+    // WHITESPACE_SKIP(token);
     if (!cheekStatusLineSp(*token)) return -1;
     rStatu* StatuLine = StatuLineTableSp(*token++);
+    if(*token == '\0')return StatuLine->id;//单字符特判
     recursive_token:
         StatuLine = StatuLine->table;
         while (StatuLine->initChar != *token && StatuLine->Next != NULL) StatuLine = StatuLine->Next;
@@ -367,6 +368,7 @@ RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValidity(const char* toke
     WHITESPACE_SKIP(token);
     if (!cheekStatusLine(*token)) return -1;
     rStatu* StatuLine = StatuLineTable(*token++);
+    if(*token == '\0')return StatuLine->id;
     recursive_token:
         StatuLine = StatuLine->table;
         while (StatuLine->initChar != *token && StatuLine->Next != NULL) StatuLine = StatuLine->Next;
@@ -396,6 +398,7 @@ RainbowLexerPrivate(void) RainbowQueueINIT()
 }
 RainbowLexerPrivate(void) RainbowRetAdd(char* token,size_t id)
 {
+    printf("[%s] with %lld\n",token,id);
     if(RainbowLexer_Ret.front + 1 >= RainbowLexer_Ret.size)
     {
         while(RainbowLexer_Ret.front + 1 >= RainbowLexer_Ret.size)RainbowLexer_Ret.size += RainbowLexer_Ret.size >> 1;
@@ -426,31 +429,54 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
             int spRet = RainbowStatuSperatorMatch(strptr);
             if(spRet >= 0)
             {   
-                size_t id = 0;
+                int id = 0;
                 id = RainbowStatusCheekOfStaticWordValidity(buf);
                 if(id >= 0) RainbowRetAdd(buf,id);
 
-                else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_num);
+                else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_var);
 
-                else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_var);
+                else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_num);
+                else if(*buf == '\0');//用于处理多个连续分隔符的情况
                 else//错误处理
                 {
                     RAINBOW_RAISE(UndefineToken);
                     printf("%s\n",buf);
                     getchar();
-                    system("quit");
+                    putchar('\n');
                 }
                 memset(buf,'\0',BUF_SIZE);
                 index = 0;
                 for (size_t i = 0; i <= spRet; i++)buf[i] = *strptr++;
                 RainbowRetAdd(buf,RainbowStatusCheekOfStaticWordValiditySp(buf));
+                memset(buf,'\0',BUF_SIZE);
             }
             else
                 buf[index++] = *strptr++;
     }
+    
+    if(*buf == '\0')return;//buf已空  情况出现在最后一个字符是分隔符时
+
+    //清理buf
+    int id = 0;
+    id = RainbowStatusCheekOfStaticWordValidity(buf);
+    if(id >= 0) RainbowRetAdd(buf,id);
+    else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_num);
+    else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_var);
+    else//错误处理
+    {
+        RAINBOW_RAISE(UndefineToken);
+        printf("%s\n",buf);
+        getchar();
+        putchar('\n');
+    }
 }
+
+
 int test()
 {
+    RainBowLexer_id = 1;
+    RainBowLexer_id_num = 2;
+    RainBowLexer_id_var = 3;
     SetConsoleOutputCP(65001);
     RainbowCreateStatusLine("World4");
     RainbowCreateStatusLine("INT32");
@@ -475,23 +501,31 @@ int test()
     printf("-------------------");
     RainbowStatusShowRuleSp();
     // /* Test of NumValidity
-    char* test_NumValidity = "12315";
-    printf("%s is %d",test,RainbowStatusCheekNumValidity(test));
-    // */
+    // char* test_NumValidity = "12315";
+    // printf("%s is %d",test_NumValidity,RainbowStatusCheekNumValidity(test_NumValidity));
+    // // */
 
-    // /* Test of varNameValidity
-    char* test_varNameValidity = "__safa_124fafg_adsdg";
-    printf("%s is %d",test,RainbowStatusCheekVarNameValidity(test));
-    // */
+    // // /* Test of varNameValidity
+    // char* test_varNameValidity = "__safa_124fafg_adsdg";
+    // printf("%s is %d",test_varNameValidity,RainbowStatusCheekVarNameValidity(test_varNameValidity));
+    // // */
 
-    // /* Test of StaticWordValidity
-    char* test_StaticWordValidity = "WHILE";
-    printf("%s is %d",test,RainbowStatusCheekOfStaticWordValidity(test));
-    // */
+    // // /* Test of StaticWordValidity
+    // char* test_StaticWordValidity = "WHILE";
+    // printf("%s is %d",test_StaticWordValidity,RainbowStatusCheekOfStaticWordValidity(test_StaticWordValidity));
+    // // */
 
-    // /* Test of SpMatch
-    char* test_SpMatch = "xxxsafaf    ";
-    printf("%s is %d",test,RainbowStatuSperatorMatch(test));
-    // */
+    // // /* Test of SpMatch
+    // char* test_SpMatch = "xxxsafaf    ";
+    // printf("%s is %d",test_SpMatch,RainbowStatuSperatorMatch(test_SpMatch));
+    // // */
+    return 0;
+}
+int main(int argc, char const *argv[])
+{
+    test();
+    putchar('\n');
+    RainbowQueueINIT();
+    RainbowLex("hello World4+123e24***$$#%%world WHILE FOR 1234\n\nxxx+++++--][)\n");
     return 0;
 }
