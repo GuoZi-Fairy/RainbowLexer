@@ -471,7 +471,82 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
     }
 }
 
+RainbowLexerPrivate(void) RainbowCompile(rStatu* statu)
+{
+    if (statu == NULL) return;
+    rStatu* status = statu;
+    printf("switch (*ch++) \n {\n");
+    while (status != NULL)
+    {
+        printf("case \'%c\':\n{\n",status->initChar);
+        if(status->table == NULL)
+        {
+            printf("return %lld;",status->id);
+        }
+        else
+        {
+            RainbowCompile(status->table);
+        }
+        printf("\nbreak;\n}");
+        status = status->Next;
+    }
+    printf("\ndefault:\n{");
+    printf("\nreturn -1;\n}");
+    printf("\n}");
+}
+RainbowLexerPrivate(void) RainbowCompileAllStatusLine()
+{
+    printf("RainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValidity(const char* token)\n{\n");
+    printf("switch (*token++)\n{\n");
+    for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
+        if(cheekStatusLine(i))
+        {
+            printf("case \'%c\':\n{\n",StatuLineTable(i)->initChar);
+            RainbowCompile(StatuLineTable(i));
+            printf("}\n");
+        }
+    printf("\ndefault: \n {\n return -1;\nbreak;\n}\n}\n");
+}
+RainbowLexerPrivate(void) RainbowCompileAllStatusLineSp()
+{
+    printf("\nRainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValiditySp(const char* token)\n{\n");
+    printf("switch (*token++)\n{\n");
+    for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
+        if(cheekStatusLineSp(i))
+        {
+            printf("case \'%c\':\n{\n",StatuLineTableSp(i)->initChar);
+            RainbowCompile(StatuLineTableSp(i));
+            printf("}\n");
+        }
+    printf("\ndefault: \n {\n return -1;\nbreak;\n}\n}\n");
+}
+RainbowLexerPrivate(void) RainbowCompileSpMatcher()
+{
+    printf("RainbowLexerPrivate(int) RainbowStatuSperatorMatch(const char* token)\n{\n");
+    printf("int id = RainbowStatusCheekOfStaticWordValiditySp(*ch);\n");
+    printf("switch (id)\n{\n");
+    for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
+    if(cheekStatusLineSp(i))
+    {
+        rStatu* statusLine = StatuLineTableSp(i)->table;
+        while(statusLine != NULL)
+        {
+            rStatu* tempStatus = statusLine;
+            CompileSpMatcher_Recursive_symbol://取消递归
+                int len = 0;
+                rStatu* last_Status = tempStatus;
+                while (tempStatus!= NULL)
+                {
+                    len++;
+                    last_Status = tempStatus;
+                    tempStatus = tempStatus -> table;
+                }
+                printf("case %lld:\n{\nreturn %d;\nbreak;\n}\n",last_Status->id,len);
+            if(1)goto CompileSpMatcher_Recursive_symbol;//To Be Continue
+        }
 
+    }
+}
 int test()
 {
     RainBowLexer_id = 1;
@@ -526,6 +601,7 @@ int main(int argc, char const *argv[])
     test();
     putchar('\n');
     RainbowQueueINIT();
-    RainbowLex("hello World4+123e24***$$#%%world WHILE FOR 1234\n\nxxx+++++--][)\n");
+    // RainbowLex("hello World4+123e24***$$#%%world WHILE FOR 1234\n\nxxx+++++--][)\n");
+    RainbowCompileAllStatusLine();
     return 0;
 }
