@@ -1,3 +1,0 @@
-    // RainbowCompileAllStatusLine();
-    // RainbowCompileAllStatusLineSp();
-    // RainbowCompileSpMatcher();
