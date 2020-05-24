@@ -621,7 +621,7 @@ int main(int argc, char const *argv[])
 {
     test();
     putchar('\n');
-    RainbowQueueINIT();
+    // RainbowQueueINIT();
     // RainbowLex("hello World4+123e24***$$#%%world WHILE FOR 1234\n\nxxx+++++--][)\n");
     // RainbowCompileAllStatusLine();
     // RainbowCompileAllStatusLineSp();

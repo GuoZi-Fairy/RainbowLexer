@@ -1,6 +1,8 @@
 "filename", "language", "C", "C++", "Markdown", "comment", "blank", "total"
 "d:\projects\RainbowLexer\README.md", "Markdown", 0, 0, 93, 0, 8, 101
-"d:\projects\RainbowLexer\RainbowLexer.c", "C", 459, 0, 0, 52, 20, 531
+"d:\projects\RainbowLexer\RainbowLexer.c", "C", 553, 0, 0, 58, 20, 631
 "d:\projects\RainbowLexer\RainbowLexer.h", "C++", 0, 5, 0, 0, 0, 5
+"d:\projects\RainbowLexer\RainbowLexerSrc.c", "C", 4, 0, 0, 0, 0, 4
+"d:\projects\RainbowLexer\compileRes.c", "C", 340, 0, 0, 0, 35, 375
 "d:\projects\RainbowLexer\test.c", "C", 12, 0, 0, 0, 1, 13
-"Total", "-", 471, 5, 93, 52, 29, 650
+"Total", "-", 909, 5, 93, 58, 64, 1129
