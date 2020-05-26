@@ -1,7 +1,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-#include<Windows.h>
+#ifdef _WIN32
+    #include<Windows.h>
+#endif
 #include"RainbowLexer.h"
 #define INIT_ID INT_MAX 
 #define HASH_TABLE_SIZE 512
@@ -572,7 +574,9 @@ int test()
     RainBowLexer_id = 1;
     RainBowLexer_id_num = 2;
     RainBowLexer_id_var = 3;
+    #ifdef _WIN32
     SetConsoleOutputCP(65001);
+    #endif
     RainbowCreateStatusLine("World4");
     RainbowCreateStatusLine("INT32");
     RainbowCreateStatusLine("INT64");
