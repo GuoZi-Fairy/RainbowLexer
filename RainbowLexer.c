@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
+#include<limits.h>
 #ifdef _WIN32
     #include<Windows.h>
 #endif
@@ -93,7 +94,7 @@ RainbowLexerPrivate(void) RainbowStatuLineParse(rStatu** statu,const char* token
     if(*token == '\0' && (*statu) == NULL)//errorRaiser
     {
         RAINBOW_RAISE(repeatedErr);
-        printf("TOKEN:%s of id:%lld\nIn id of %lld\n",TokenRule_Now,RainBowLexer_id,RainBowLexer_id);
+        printf("TOKEN:%s of id:%ld\nIn id of %ld\n",TokenRule_Now,RainBowLexer_id,RainBowLexer_id);
         return;
     }
     while(*token != '\0')
@@ -140,7 +141,7 @@ RainbowLexerPrivate(void) RainbowStatusShowLine(rStatu* statu,size_t deep)
         {
             putchar('|');
             for (size_t i = 0; i < deep; i++) putchar(' ');
-            printf("(id:%lld)\n",statu->id);
+            printf("(id:%ld)\n",statu->id);
         }
         statu = statu->Next;
     }
@@ -180,7 +181,7 @@ RainbowLexerPrivate(void) RainbowStatuLineParseSp(rStatu** statu,const char* tok
     if(*token == '\0' && (*statu) == NULL)//errorRaiser
     {
         RAINBOW_RAISE(repeatedErr);
-        printf("SP:%s of id:%lld\nIn id of %lld\n",TokenRule_Now,RainBowLexer_id,RainBowLexer_id);
+        printf("SP:%s of id:%ld\nIn id of %ld\n",TokenRule_Now,RainBowLexer_id,RainBowLexer_id);
         return;
     }
     while(*token != '\0')
@@ -400,7 +401,7 @@ RainbowLexerPrivate(void) RainbowQueueINIT()
 }
 RainbowLexerPrivate(void) RainbowRetAdd(char* token,size_t id)
 {
-    printf("[%s] with %lld\n",token,id);
+    printf("[%s] with %ld\n",token,id);
     if(RainbowLexer_Ret.front + 1 >= RainbowLexer_Ret.size)
     {
         while(RainbowLexer_Ret.front + 1 >= RainbowLexer_Ret.size)RainbowLexer_Ret.size += RainbowLexer_Ret.size >> 1;
@@ -479,7 +480,7 @@ RainbowLexerPrivate(void) RainbowCompile(rStatu* statu)
     if (statu == NULL) return;
     if(statu->table == NULL)
     {
-            printf("return %lld;break;",statu->id);
+            printf("return %ld;break;",statu->id);
             return;
     }
     rStatu* status = statu;
@@ -507,7 +508,7 @@ RainbowLexerPrivate(void) RainbowCompileAllStatusLine()
             else printf("case \'%c\':\n{\n",StatuLineTable(i)->initChar);
             if(StatuLineTable(i)->table == NULL)
             {
-                printf("return %lld;break;\n}\n",StatuLineTable(i)->id);
+                printf("return %ld;break;\n}\n",StatuLineTable(i)->id);
                 continue;
             }
             RainbowCompile(StatuLineTable(i)->table);
@@ -526,7 +527,7 @@ RainbowLexerPrivate(void) RainbowCompileAllStatusLineSp()
             else printf("case \'%c\':\n{\n",StatuLineTableSp(i)->initChar);
             if(StatuLineTableSp(i)->table == NULL)
             {
-                printf("return %lld;break;\n}\n",StatuLineTableSp(i)->id);
+                printf("return %ld;break;\n}\n",StatuLineTableSp(i)->id);
                 continue;
             }
             RainbowCompile(StatuLineTableSp(i)->table);
@@ -542,7 +543,7 @@ RainbowLexerPrivate(void) RainbowCompileDeepthOfSp(rStatu* statu,int len)
     {
         if(status->table == NULL)
         {
-            printf("case %lld:\n{\nreturn %d;\nbreak;\n}\n",status->id,len);
+            printf("case %ld:\n{\nreturn %d;\nbreak;\n}\n",status->id,len);
         }
         else
         {
