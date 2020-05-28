@@ -341,7 +341,7 @@ RainbowLexerPrivate(int) RainbowStatusCheekNumValidity(const char* token)//ç”¨äº
 RainbowLexerPrivate(int) GetStatusOfVarName(char ch)
 {
     if (ch>='0'&&ch<='9')return 2;
-    else if ((ch>='a'&&ch<='z')||(ch=='_'))return 1;
+    else if ((isalpha(ch))||(ch=='_'))return 1;
     else if (ch == ' ')return 0;
     else if (ch == '\0')return 3;
     else return 4;
@@ -515,7 +515,7 @@ RainbowLexerPrivate(void) RainbowCompileAllStatusLine()
             RainbowCompile(StatuLineTable(i)->table);
             printf("}");
         }
-    printf("}}\n");
+    printf("default:return -1;\nbreak;}}\n");
 }
 RainbowLexerPrivate(void) RainbowCompileAllStatusLineSp()
 {
@@ -534,7 +534,7 @@ RainbowLexerPrivate(void) RainbowCompileAllStatusLineSp()
             RainbowCompile(StatuLineTableSp(i)->table);
             printf("}");
         }
-    printf("}}\n");
+    printf("default:return -1;\nbreak;}}\n");
 }
 RainbowLexerPrivate(void) RainbowCompileDeepthOfSp(rStatu* statu,int len)
 {
@@ -570,6 +570,20 @@ RainbowLexerPrivate(void) RainbowCompileSpMatcher()
     }
     printf("\ndefault:{return -1;break;}");
     printf("}}\n");
+}
+
+RainbowLexerPrivate(void) RainbowLexerCompiler(const char* file_path)
+{
+    freopen(file_path,"w",stdout);
+    printf("#include \"RainbowLexerSrc.c\"\n");
+    RainbowCompileAllStatusLine();
+    RainbowCompileAllStatusLineSp();
+    RainbowCompileSpMatcher();
+    #ifdef _WIN32
+    freopen("CON","w",stdout);
+    #else
+    freopen("/dev/console",'w',stdou);
+    #endif
 }
 int test()
 {
@@ -628,9 +642,11 @@ int main(int argc, char const *argv[])
     test();
     putchar('\n');
     RainbowQueueINIT();
-    RainbowLex("hello World4+123e24***$$#%%world WHILE FOR 1234\n\nxxx+++++--][)\n");
-    RainbowCompileAllStatusLine();
-    RainbowCompileAllStatusLineSp();
-    RainbowCompileSpMatcher();
+    // RainbowLex("hello World4+123e24***$$#%%world WHILE FOR 1234\n\nxxx+++++--][)\n");
+    RainbowLexerCompiler("demoCompile____.c");
+    printf("compiled");
+    // RainbowCompileAllStatusLine();
+    // RainbowCompileAllStatusLineSp();
+    // RainbowCompileSpMatcher();
     return 0;
 }

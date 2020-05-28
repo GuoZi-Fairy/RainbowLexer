@@ -1,4 +1,3 @@
-
 #include "RainbowLexer.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,23 +20,18 @@ typedef struct queue
     unsigned long long rear;
     unsigned long long front;
 }Rainbowqueue;
-static size_t RainBowLexer_id = 1;
-static size_t RainBowLexer_id_num = 2;
-static size_t RainBowLexer_id_var = 3;
+static size_t RainBowLexer_id;
+static size_t RainBowLexer_id_num;
+static size_t RainBowLexer_id_var;
 #define BUF_SIZE 1024
 #define QUEUE_INIT_SIZE 512;
-static Rainbowqueue RainbowLexer_Ret = {NULL,0,0,0};
+static Rainbowqueue RainbowLexer_Ret;
 static RainbowError repeatedErr = {"Repeated tokenRule","Repeated token ->"};
 static RainbowError UndefineToken = {"Undefine token","UNdefine Token ->"};
 #define RAINBOW_RAISE(ERROR) printf("ERROR:\n[%s]:%s\n",ERROR.errorMsg,ERROR.errorDoc);
 #define WHITESPACE_SKIP(str) {while(*str==' ')str++;}
-RainbowLexerPrivate(int) RainbowQueueInitedTest()
-{
-    return (RainbowLexer_Ret.front==0&&RainbowLexer_Ret.rear==0&&RainbowLexer_Ret.size==0&&RainbowLexer_Ret.queue==NULL);
-}
 RainbowLexerPrivate(void) RainbowQueueINIT()
 {
-    
     RainbowLexer_Ret.front = 0;
     RainbowLexer_Ret.rear = 0;
     RainbowLexer_Ret.size = QUEUE_INIT_SIZE;
@@ -61,10 +55,100 @@ RainbowLexerPrivate(void) RainbowRetAdd(char* token,size_t id)
     }
     tokenElement->token[len] = '\0';
 }
-RainbowLexerPrivate(int) RainbowStatuSperatorMatch(const char* token);
-RainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValiditySp(const char* token);
-RainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValidity(const char* token);
+RainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValidity(const char* token){
+switch (*token++){
+case 'F':{switch (*token++) {
+case 'L':{switch (*token++) {
+case 'O':{switch (*token++) {
+case 'A':{switch (*token++) {
+case 'T':{switch (*token++) {
+case '3':{return 4;break;break;}case '6':{return 5;break;break;}
+default:{return -1;break;}}
+break;}
+default:{return -1;break;}}
+break;}
+default:{return -1;break;}}
+break;}
+default:{return -1;break;}}
+break;}case 'O':{return 6;break;break;}
+default:{return -1;break;}}
+}case 'I':{switch (*token++) {
+case 'N':{switch (*token++) {
+case 'T':{switch (*token++) {
+case '3':{return 2;break;break;}case '6':{return 3;break;break;}
+default:{return -1;break;}}
+break;}
+default:{return -1;break;}}
+break;}
+default:{return -1;break;}}
+}case 'W':{switch (*token++) {
+case 'o':{switch (*token++) {
+case 'r':{switch (*token++) {
+case 'l':{switch (*token++) {
+case 'd':{return 1;break;break;}
+default:{return -1;break;}}
+break;}
+default:{return -1;break;}}
+break;}
+default:{return -1;break;}}
+break;}case 'H':{switch (*token++) {
+case 'I':{switch (*token++) {
+case 'L':{return 7;break;break;}
+default:{return -1;break;}}
+break;}
+default:{return -1;break;}}
+break;}
+default:{return -1;break;}}
+}}}
+RainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValiditySp(const char* token){
+switch (*token++){
+case '\n':{return 18;break;}case ' ':{return 19;break;}case '(':{return 10;break;}case ')':{return 11;break;}case '*':{switch (*token++) {
+case '*':{return 16;break;break;}
+default:{return -1;break;}}
+}case '+':{return 9;break;}case '-':{return 8;break;}case '/':{return 13;break;}case '[':{return 14;break;}case ']':{return 15;break;}case 'x':{switch (*token++) {
+case 'x':{return 17;break;break;}
+default:{return -1;break;}}
+}}}
+RainbowLexerPrivate(int) GetStatusOfVarName(char ch)
+{
+    if (ch>='0'&&ch<='9')return 2;
+    else if ((ch>='a'&&ch<='z')||(ch=='_'))return 1;
+    else if (ch == ' ')return 0;
+    else if (ch == '\0')return 3;
+    else return 4;
+}
+RainbowLexerPrivate(int) RainbowStatusCheekVarNameValidity(const char* token)
+{
+    static int varNameStatus[4][5] = 
+    {//whitespace , ch , num , end  undefine
+        { 0       ,  1 ,  -1  ,  -1 , -1},//start : 0
+        { 3       ,  1 ,   2  ,  -2 , -1},//ch : 1
+        { 3       ,  1 ,   2  ,  -2 , -1},//num:2
+        { 3       , -1 ,  -1  ,  -2 , -1},//whitespace : 3
+    };
+    int status = varNameStatus[0][GetStatusOfVarName(*token++)];
+    while (status >= 0)
+    {
+        status = varNameStatus[status][GetStatusOfVarName(*token++)];
+    }
+    return status;
+}
+RainbowLexerPrivate(int) RainbowStatuSperatorMatch(const char* token){
+int id = RainbowStatusCheekOfStaticWordValiditySp(token);
+switch (id){
+case 18:{return 0;break;}
+case 19:{return 0;break;}
+case 10:{return 0;break;}
+case 11:{return 0;break;}
+case 16:{return 2;break;}
+case 9:{return 1;break;}
+case 8:{return 1;break;}
+case 13:{return 0;break;}
+case 14:{return 0;break;}
+case 15:{return 0;break;}
+case 17:{return 2;break;}
 
+default:{return -1;break;}}}
 RainbowLexerPrivate(int) GetStatusOfNum(char ch)
 {
     switch (ch)
@@ -126,36 +210,11 @@ RainbowLexerPrivate(int) RainbowStatusCheekNumValidity(const char* token)//用�
     }
     return status;
 }
-RainbowLexerPrivate(int) GetStatusOfVarName(char ch)
-{
-    if (ch>='0'&&ch<='9')return 2;
-    else if ((isalpha(ch))||(ch=='_'))return 1;
-    else if (ch == ' ')return 0;
-    else if (ch == '\0')return 3;
-    else return 4;
-}
-RainbowLexerPrivate(int) RainbowStatusCheekVarNameValidity(const char* token)
-{
-    static int varNameStatus[4][5] = 
-    {//whitespace , ch , num , end  undefine
-        { 0       ,  1 ,  -1  ,  -1 , -1},//start : 0
-        { 3       ,  1 ,   2  ,  -2 , -1},//ch : 1
-        { 3       ,  1 ,   2  ,  -2 , -1},//num:2
-        { 3       , -1 ,  -1  ,  -2 , -1},//whitespace : 3
-    };
-    int status = varNameStatus[0][GetStatusOfVarName(*token++)];
-    while (status >= 0)
-    {
-        status = varNameStatus[status][GetStatusOfVarName(*token++)];
-    }
-    return status;
-}
 RainbowLexerPrivate(void) RainbowLex(const char* string)
 {
     /* 将string解析
         并加入到ret列表中
     */
-    if(RainbowQueueInitedTest())RainbowQueueINIT();
     const char* strptr = string;
     WHITESPACE_SKIP(strptr);
     char buf[BUF_SIZE] = {'\0'};
@@ -196,8 +255,8 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
     int id = 0;
     id = RainbowStatusCheekOfStaticWordValidity(buf);
     if(id >= 0) RainbowRetAdd(buf,id);
-    else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_var);
-    else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_num);
+    else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_num);
+    else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_var);
     else//错误处理
     {
         RAINBOW_RAISE(UndefineToken);
