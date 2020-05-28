@@ -155,7 +155,6 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
     /* 将string解析
         并加入到ret列表中
     */
-    if(RainbowQueueInitedTest())RainbowQueueINIT();
     const char* strptr = string;
     WHITESPACE_SKIP(strptr);
     char buf[BUF_SIZE] = {'\0'};
@@ -163,6 +162,7 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
     while(*strptr != '\0')
     {
             int spRet = RainbowStatuSperatorMatch(strptr);
+            if(buf[0] == '\0') goto BUF_EMPTY_CASE_;
             if(spRet >= 0)
             {   
                 int id = 0;
@@ -180,6 +180,8 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
                     getchar();
                     putchar('\n');
                 }
+
+                BUF_EMPTY_CASE_:
                 memset(buf,'\0',BUF_SIZE);
                 index = 0;
                 for (size_t i = 0; i <= spRet; i++)buf[i] = *strptr++;
@@ -196,8 +198,8 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
     int id = 0;
     id = RainbowStatusCheekOfStaticWordValidity(buf);
     if(id >= 0) RainbowRetAdd(buf,id);
-    else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_var);
-    else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_num);
+    else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_num);
+    else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_var);
     else//错误处理
     {
         RAINBOW_RAISE(UndefineToken);

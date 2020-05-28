@@ -431,6 +431,7 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
     while(*strptr != '\0')
     {
             int spRet = RainbowStatuSperatorMatch(strptr);
+            if(buf[0] == '\0') goto BUF_EMPTY_CASE_;//处理第一个字符是分隔符的情况
             if(spRet >= 0)
             {   
                 int id = 0;
@@ -448,6 +449,8 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
                     getchar();
                     putchar('\n');
                 }
+
+                BUF_EMPTY_CASE_:
                 memset(buf,'\0',BUF_SIZE);
                 index = 0;
                 for (size_t i = 0; i <= spRet; i++)buf[i] = *strptr++;
@@ -642,8 +645,14 @@ int main(int argc, char const *argv[])
     test();
     putchar('\n');
     RainbowQueueINIT();
-    // RainbowLex("hello World4+123e24***$$#%%world WHILE FOR 1234\n\nxxx+++++--][)\n");
-    RainbowLexerCompiler("demoCompile____.c");
+    char buf[5000] = {'\0'};
+    // while(1)
+    // {
+    //     scanf("%[^~]",buf);
+        RainbowLex("\nhello*WHILE");
+    //     memset(buf,'\0',5000);
+    // }
+    // RainbowLexerCompiler("demoCompile____.c");
     printf("compiled");
     // RainbowCompileAllStatusLine();
     // RainbowCompileAllStatusLineSp();
