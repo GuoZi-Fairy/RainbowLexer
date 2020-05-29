@@ -431,7 +431,7 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
     while(*strptr != '\0')
     {
             int spRet = RainbowStatuSperatorMatch(strptr);
-            if(buf[0] == '\0') goto BUF_EMPTY_CASE_;//处理第一个字符是分隔符的情况
+            if(buf[0] == '\0' && spRet >= 0) goto BUF_EMPTY_CASE_;//处理第一个字符是分隔符的情况
             if(spRet >= 0)
             {   
                 int id = 0;
