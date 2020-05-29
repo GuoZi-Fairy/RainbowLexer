@@ -585,7 +585,7 @@ RainbowLexerPrivate(void) RainbowLexerCompiler(const char* file_path)
     #ifdef _WIN32
     freopen("CON","w",stdout);
     #else
-    freopen("/dev/console",'w',stdou);
+    freopen("/dev/console","w",stdout);
     #endif
 }
 int test()
