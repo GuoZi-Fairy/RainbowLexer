@@ -37,6 +37,7 @@ typedef struct queue
 
 static RainbowError repeatedErr = {"Repeated tokenRule","Repeated token ->"};
 static RainbowError UndefineToken = {"Undefine token","UNdefine Token ->"};
+static RainbowError MallocError = {"fail malloc","failed to alloc memory"};
 #define RAINBOW_RAISE(ERROR) printf("ERROR:\n[%s]:%s\n",ERROR.errorMsg,ERROR.errorDoc);
 static size_t RainBowLexer_id;
 static size_t RainBowLexer_id_num;
@@ -101,6 +102,13 @@ RainbowLexerPrivate(void) RainbowStatuLineParse(rStatu** statu,const char* token
     while(*token != '\0')
     {
         *statu = (rStatu*)malloc(sizeof(rStatu));
+        if(statu== NULL)
+        {
+            RAINBOW_RAISE(MallocError);
+            printf("[PARSE-MALLOC]\n");
+            getchar();
+            return;
+        }
         lastestStatu = statu;
         (*statu)->initChar = *token++;
         (*statu)->Next = NULL;
@@ -188,6 +196,13 @@ RainbowLexerPrivate(void) RainbowStatuLineParseSp(rStatu** statu,const char* tok
     while(*token != '\0')
     {
         *statu = (rStatu*)malloc(sizeof(rStatu));
+        if(statu== NULL)
+        {
+            RAINBOW_RAISE(MallocError);
+            printf("[PARSE-MALLOC-SP]\n");
+            getchar();
+            return;
+        }
         lastestStatu = statu;
         (*statu)->initChar = *token++;
         (*statu)->Next = NULL;
@@ -224,26 +239,29 @@ RainbowLexerPrivate(int) RainbowStatuSperatorMatch(const char* token)
         若不是分隔符 则返回-1
         若是 则范围从起始位置的偏移量 
     */
-    rStatu* compStatu = StatuLineTable(HASH_TABLE_SIZE);
+    rStatu* compStatu = StatuLineTableSp(HASH_TABLE_SIZE);
     const char* ch = token;
     int result = 0;
     if(!cheekStatusLineSp(*ch))return -1;
     rStatu* SpStatu = StatuLineTableSp(*ch++);
     rStatu* lastStatu = SpStatu;
     SpStatu = SpStatu->table;
-    if(SpStatu == NULL)return result;//单字符特判
+    if(SpStatu == NULL || *ch=='\0')return result;//单字符特判
     while(SpStatu != NULL && *ch!='\0')
     {
-        lastStatu = SpStatu;
         if(SpStatu->initChar == *ch && SpStatu->table != NULL) 
         {
             SpStatu = SpStatu->table;
             ch++;
             result++;
         }
-        else if(SpStatu->initChar != *ch && (SpStatu->table==NULL || SpStatu->id != compStatu->id)) return result;
+        else if(SpStatu->initChar != *ch && (SpStatu->table==NULL || lastStatu->id != compStatu->id)) return result;
         else if(SpStatu->initChar == *ch && SpStatu->table == NULL)return result+1;
-        else SpStatu = SpStatu->Next;
+        else 
+        {
+            lastStatu = SpStatu;
+            SpStatu = SpStatu->Next;
+        }
     }
     return -1;
 }
@@ -399,6 +417,13 @@ RainbowLexerPrivate(void) RainbowQueueINIT()
     RainbowLexer_Ret.rear = 0;
     RainbowLexer_Ret.size = QUEUE_INIT_SIZE;
     RainbowLexer_Ret.queue = (RainbowToken*)malloc(RainbowLexer_Ret.size*sizeof(RainbowToken));
+    if(RainbowLexer_Ret.queue == NULL)
+    {
+        RAINBOW_RAISE(MallocError);
+        printf("[QUEUE-INIT]\n");
+        getchar();
+        return;
+    }
 }
 RainbowLexerPrivate(void) RainbowRetAdd(char* token,size_t id)
 {
@@ -412,6 +437,13 @@ RainbowLexerPrivate(void) RainbowRetAdd(char* token,size_t id)
     size_t len = strlen(token);
     tokenElement->id = id;
     tokenElement->token = (char*)malloc((len+1)*sizeof(char));
+    if(tokenElement->token == NULL)
+    {
+        RAINBOW_RAISE(MallocError);
+        printf("[TOKEN-MALLOC]\n");
+        getchar();
+        return;
+    }
     for (size_t i = 0; i < len; i++)
     {
         tokenElement->token[i] = token[i];
@@ -459,6 +491,7 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
             }
             else
                 buf[index++] = *strptr++;
+            printf("%s\n",buf);
     }
     
     if(*buf == '\0')return;//buf已空  情况出现在最后一个字符是分隔符时
@@ -649,7 +682,7 @@ int main(int argc, char const *argv[])
     // while(1)
     // {
     //     scanf("%[^~]",buf);
-        RainbowLex("\nhello*WHILE");
+        RainbowLex("*****");
     //     memset(buf,'\0',5000);
     // }
     // RainbowLexerCompiler("demoCompile____.c");
@@ -659,3 +692,8 @@ int main(int argc, char const *argv[])
     // RainbowCompileSpMatcher();
     return 0;
 }
+
+
+//TODO
+// 解决* ***的符号匹配
+//目前问题 调试模式下可以正确匹配*  编译运行下无法匹配*
