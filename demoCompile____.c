@@ -49,7 +49,7 @@ RainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValiditySp(const char* tok
 switch (*token++){
 case '\n':{return 18;break;}case ' ':{return 19;break;}case '(':{return 10;break;}case ')':{return 11;break;}case '*':{switch (*token++) {
 case '*':{return 16;break;break;}
-default:{return -1;break;}}
+default:{return 12;break;}}
 }case '+':{return 9;break;}case '-':{return 8;break;}case '/':{return 13;break;}case '[':{return 14;break;}case ']':{return 15;break;}case 'x':{switch (*token++) {
 case 'x':{return 17;break;break;}
 default:{return -1;break;}}
@@ -71,7 +71,3 @@ case 15:{return 0;break;}
 case 17:{return 2;break;}
 
 default:{return -1;break;}}}
-int main(int argc, char const *argv[]) {
-  RainbowLex("IT");
-  return 0;
-}

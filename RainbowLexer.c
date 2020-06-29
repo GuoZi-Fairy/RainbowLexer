@@ -7,11 +7,11 @@
     #include<Windows.h>
 #endif
 #include"RainbowLexer.h"
-#define INIT_ID INT_MAX 
+#define INIT_ID (-1) 
 #define HASH_TABLE_SIZE 512
 typedef struct RainbowStatusLine
 {
-    size_t id;
+    long long id;
     char initChar;
     struct RainbowStatusLine *table;//链表
     struct RainbowStatusLine *Next;
@@ -43,9 +43,11 @@ static size_t RainBowLexer_id;
 static size_t RainBowLexer_id_num;
 static size_t RainBowLexer_id_var;
 static char* TokenRule_Now;
+static rStatu* compStatu;
 static Rainbowqueue RainbowLexer_Ret;
 #define WHITESPACE_SKIP(str) {while(*str==' ')str++;}
 #define STATULINE_INIT(statuLine,ch) {\
+    statuLine->id = INIT_ID;\
     statuLine->initChar = ch;\
     statuLine->Next = NULL;\
     statuLine->table = NULL;\
@@ -71,7 +73,6 @@ RainbowLexerPrivate(void) AddTableElement(rStatu* destn,rStatu* resouce)//为目
 RainbowLexerPrivate(int) cheekStatusLine(unsigned int initCh) //检查以InitCh为索引的状态链是否存在
 {
     rStatu* cheekRet = StatuLineTable(initCh);
-    rStatu* compStatu = StatuLineTable(HASH_TABLE_SIZE);
     if((cheekRet->id == compStatu->id)&&(cheekRet->initChar == compStatu->initChar)&&(cheekRet->Next==compStatu->Next)&&(cheekRet->table == compStatu->table))return 0;
     return 1;
     
@@ -110,8 +111,7 @@ RainbowLexerPrivate(void) RainbowStatuLineParse(rStatu** statu,const char* token
             return;
         }
         lastestStatu = statu;
-        (*statu)->initChar = *token++;
-        (*statu)->Next = NULL;
+        STATULINE_INIT((*statu),*token++);
         statu = &((*statu)->table);
         *statu = NULL;
     }
@@ -146,7 +146,7 @@ RainbowLexerPrivate(void) RainbowStatusShowLine(rStatu* statu,size_t deep)
     {
         output(statu,deep,statu->initChar);
         RainbowStatusShowLine(statu->table,deep+1);
-        if(statu->table == NULL)
+        if(statu->table == NULL || statu->id != INIT_ID )
         {
             putchar('|');
             for (size_t i = 0; i < deep; i++) putchar(' ');
@@ -204,8 +204,7 @@ RainbowLexerPrivate(void) RainbowStatuLineParseSp(rStatu** statu,const char* tok
             return;
         }
         lastestStatu = statu;
-        (*statu)->initChar = *token++;
-        (*statu)->Next = NULL;
+        STATULINE_INIT((*statu),*token++);
         statu = &((*statu)->table);
         *statu = NULL;
     }
@@ -214,7 +213,6 @@ RainbowLexerPrivate(void) RainbowStatuLineParseSp(rStatu** statu,const char* tok
 RainbowLexerPrivate(int) cheekStatusLineSp(unsigned int initCh) //检查以InitCh为索引的状态链是否存在
 {
     rStatu* cheekRet = StatuLineTableSp(initCh);
-    rStatu* compStatu = StatuLineTableSp(HASH_TABLE_SIZE);
     if((cheekRet->id == compStatu->id)&&(cheekRet->initChar == compStatu->initChar)&&(cheekRet->Next==compStatu->Next)&&(cheekRet->table == compStatu->table))return 0;
     return 1;
     
@@ -232,38 +230,27 @@ RainbowLexerPrivate(void) RainbowStatusShowRuleSp()
     for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
         if(cheekStatusLineSp(i))RainbowStatusShowLine(StatuLineTableSp(i),0);
 }
-RainbowLexerPrivate(int) RainbowStatuSperatorMatch(const char* token)
+RainbowLexerPrivate(int) RainbowStatuSperatorMatchRecurse(rStatu* statu,const char* token)
+{
+    while (statu != NULL && statu->initChar != *token)  statu = statu->Next;//条件一必须在前是因为若在后可能会引起segment fault
+    if (statu == NULL) return -1;
+    else if (statu != NULL && statu -> table == NULL && statu->id != INIT_ID) return 0;
+    int probe = RainbowStatuSperatorMatchRecurse(statu->table,token+1);
+    if (probe == -1 && statu->id == INIT_ID)return -1;
+    else if (probe == -1 && statu->id != INIT_ID)return 0;
+    else return 1 + probe;
+
+}
+RainbowLexerPrivate(int) RainbowStatuSperatorMatch(const char* token)//TODO 重写
 {
     /*
         从参数位置开始匹配分隔符
         若不是分隔符 则返回-1
         若是 则范围从起始位置的偏移量 
     */
-    rStatu* compStatu = StatuLineTableSp(HASH_TABLE_SIZE);
-    const char* ch = token;
-    int result = 0;
-    if(!cheekStatusLineSp(*ch))return -1;
-    rStatu* SpStatu = StatuLineTableSp(*ch++);
-    rStatu* lastStatu = SpStatu;
-    SpStatu = SpStatu->table;
-    if(SpStatu == NULL || *ch=='\0')return result;//单字符特判
-    while(SpStatu != NULL && *ch!='\0')
-    {
-        if(SpStatu->initChar == *ch && SpStatu->table != NULL) 
-        {
-            SpStatu = SpStatu->table;
-            ch++;
-            result++;
-        }
-        else if(SpStatu->initChar != *ch && (SpStatu->table==NULL || lastStatu->id != compStatu->id)) return result;
-        else if(SpStatu->initChar == *ch && SpStatu->table == NULL)return result+1;
-        else 
-        {
-            lastStatu = SpStatu;
-            SpStatu = SpStatu->Next;
-        }
-    }
-    return -1;
+    if (!cheekStatusLineSp(*token))return -1;
+    rStatu* statu = StatuLineTableSp(*token);
+    return RainbowStatuSperatorMatchRecurse(statu,token);
 }
 RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValiditySp(const char* token)
 {
@@ -275,15 +262,14 @@ RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValiditySp(const char* to
     // WHITESPACE_SKIP(token);
     if (!cheekStatusLineSp(*token)) return -1;
     rStatu* StatuLine = StatuLineTableSp(*token++);
-    if(*token == '\0')return StatuLine->id;//单字符特判
+    if(*token == '\0')return StatuLine->id;//单字符特判(若无此id则默认id返回值为-1)
     recursive_token:
         StatuLine = StatuLine->table;
         while (StatuLine->initChar != *token && StatuLine->Next != NULL) StatuLine = StatuLine->Next;
-        if(StatuLine->Next == NULL && StatuLine->initChar != *token)return -1;
+        if(StatuLine->Next == NULL && StatuLine->initChar != *token)return StatuLine->id;
         else if(StatuLine->table == NULL && *(token+1) =='\0')return StatuLine->id;
         else if(StatuLine->table != NULL && *(token+1) =='\0')
         {
-            rStatu* compStatu = StatuLineTableSp(HASH_TABLE_SIZE);
             if(StatuLine->id!=compStatu->id)return StatuLine->id;
             else return -1;
         }
@@ -398,7 +384,6 @@ RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValidity(const char* toke
         else if(StatuLine->table == NULL && *(token+1) =='\0')return StatuLine->id;
         else if(StatuLine->table != NULL && *(token+1) =='\0')
         {
-            rStatu* compStatu = StatuLineTable(HASH_TABLE_SIZE);
             if(StatuLine->id!=compStatu->id)return StatuLine->id;
             else return -1;
         }
@@ -473,7 +458,7 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
                 else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_var);
 
                 else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_num);
-                else if(*buf == '\0');//用于处理多个连续分隔符的情况
+                else if(*buf == '\0')goto BUF_EMPTY_CASE_;//用于处理多个连续分隔符的情况
                 else//错误处理
                 {
                     RAINBOW_RAISE(UndefineToken);
@@ -512,7 +497,7 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
 }
 
 //Compile module
-RainbowLexerPrivate(void) RainbowCompile(rStatu* statu)
+RainbowLexerPrivate(void) RainbowCompile(rStatu* statu)//用于编译一条状态链
 {
     if (statu == NULL) return;
     if(statu->table == NULL)
@@ -532,6 +517,28 @@ RainbowLexerPrivate(void) RainbowCompile(rStatu* statu)
     }
     printf("\ndefault:{");
     printf("return -1;break;");
+    printf("}}\n");
+}
+RainbowLexerPrivate(void) RainbowCompileSp(rStatu* statu,int defaultID)//用于编译一条状态链
+{
+    if (statu == NULL) return;
+    if(statu->table == NULL)
+    {
+            printf("return %ld;break;",statu->id);
+            return;
+    }
+    rStatu* status = statu;
+    printf("switch (*token++) {\n");
+    while (status != NULL)
+    {
+        if(status->initChar == '\n')printf("case \'\\n\':{");
+        else printf("case \'%c\':{",status->initChar);
+        RainbowCompileSp(status->table,(status->id==INIT_ID ? defaultID : status->id));
+        printf("break;}");
+        status = status->Next;
+    }
+    printf("\ndefault:{");
+    printf("return %d;break;",defaultID);
     printf("}}\n");
 }
 RainbowLexerPrivate(void) RainbowCompileAllStatusLine()
@@ -567,7 +574,7 @@ RainbowLexerPrivate(void) RainbowCompileAllStatusLineSp()
                 printf("return %ld;break;}",StatuLineTableSp(i)->id);
                 continue;
             }
-            RainbowCompile(StatuLineTableSp(i)->table);
+            RainbowCompileSp(StatuLineTableSp(i)->table,(StatuLineTableSp(i)->id==INIT_ID ? -1 : (StatuLineTableSp(i)->id)));
             printf("}");
         }
     printf("default:return -1;\nbreak;}}\n");
@@ -608,7 +615,7 @@ RainbowLexerPrivate(void) RainbowCompileSpMatcher()
     printf("}}\n");
 }
 
-RainbowLexerPrivate(void) RainbowLexerCompiler(const char* file_path)
+RainbowLexerPrivate(void) RainbowLexerCompiler(const char* file_path) //总编译指令
 {
     freopen(file_path,"w",stdout);
     printf("#include \"RainbowLexerSrc.c\"\n");
@@ -675,6 +682,7 @@ int test()
 }
 int main(int argc, char const *argv[])
 {
+    compStatu = StatuLineTable(HASH_TABLE_SIZE);//不能删
     test();
     putchar('\n');
     RainbowQueueINIT();
@@ -682,14 +690,14 @@ int main(int argc, char const *argv[])
     // while(1)
     // {
     //     scanf("%[^~]",buf);
-        RainbowLex("*****");
+        // RainbowLex("*****");
     //     memset(buf,'\0',5000);
     // }
-    // RainbowLexerCompiler("demoCompile____.c");
+    RainbowLexerCompiler("demoCompile____.c");
     printf("compiled");
-    // RainbowCompileAllStatusLine();
-    // RainbowCompileAllStatusLineSp();
-    // RainbowCompileSpMatcher();
+    RainbowCompileAllStatusLine();
+    RainbowCompileAllStatusLineSp();
+    RainbowCompileSpMatcher();
     return 0;
 }
 
