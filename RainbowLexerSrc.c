@@ -162,7 +162,7 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
     while(*strptr != '\0')
     {
             int spRet = RainbowStatuSperatorMatch(strptr);
-            if(buf[0] == '\0') goto BUF_EMPTY_CASE_;
+            if(buf[0] == '\0' && spRet >= 0) goto BUF_EMPTY_CASE_;//处理第一个字符是分隔符的情况
             if(spRet >= 0)
             {   
                 int id = 0;
@@ -172,7 +172,7 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
                 else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_var);
 
                 else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_num);
-                else if(*buf == '\0');//用于处理多个连续分隔符的情况
+                else if(*buf == '\0')goto BUF_EMPTY_CASE_;//用于处理多个连续分隔符的情况
                 else//错误处理
                 {
                     RAINBOW_RAISE(UndefineToken);

@@ -166,7 +166,6 @@ RainbowLexerPrivate(void) RainbowStatusShowRule()
 /* sperator */
 RainbowLexerPrivate(rStatu*) StatuLineTableSp(int initCh) //从返回hash表中索引为initCh的状态链
 {
-
     static rStatu StatuLineTableSp[HASH_TABLE_SIZE+1] = {0};//最后一个位置用于存储初始情况
     return &StatuLineTableSp[initCh];
 }
@@ -476,7 +475,6 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
             }
             else
                 buf[index++] = *strptr++;
-            printf("%s\n",buf);
     }
     
     if(*buf == '\0')return;//buf已空  情况出现在最后一个字符是分隔符时
@@ -512,7 +510,7 @@ RainbowLexerPrivate(void) RainbowCompile(rStatu* statu)//用于编译一条状�
         if(status->initChar == '\n')printf("case \'\\n\':{");
         else printf("case \'%c\':{",status->initChar);
         RainbowCompile(status->table);
-        printf("break;}");
+        printf("}");
         status = status->Next;
     }
     printf("\ndefault:{");
@@ -522,19 +520,18 @@ RainbowLexerPrivate(void) RainbowCompile(rStatu* statu)//用于编译一条状�
 RainbowLexerPrivate(void) RainbowCompileSp(rStatu* statu,int defaultID)//用于编译一条状态链
 {
     if (statu == NULL) return;
-    if(statu->table == NULL)
-    {
-            printf("return %ld;break;",statu->id);
-            return;
-    }
     rStatu* status = statu;
     printf("switch (*token++) {\n");
     while (status != NULL)
     {
         if(status->initChar == '\n')printf("case \'\\n\':{");
         else printf("case \'%c\':{",status->initChar);
+        if(statu->table == NULL)
+        {
+            printf("return %ld;break;",statu->id);
+        }
         RainbowCompileSp(status->table,(status->id==INIT_ID ? defaultID : status->id));
-        printf("break;}");
+        printf(";}");
         status = status->Next;
     }
     printf("\ndefault:{");
@@ -587,7 +584,12 @@ RainbowLexerPrivate(void) RainbowCompileDeepthOfSp(rStatu* statu,int len)
     {
         if(status->table == NULL)
         {
-            printf("case %ld:{return %d;break;}\n",status->id,len);
+            printf("case %ld:{return %ld;break;}\n",status->id,len);
+        }
+        else if (status->id != INIT_ID)
+        {
+            printf("case %ld:{return %ld;break;}\n",status->id,len);
+            RainbowCompileDeepthOfSp(status->table,len+1);
         }
         else
         {
@@ -636,6 +638,7 @@ int test()
     #ifdef _WIN32
     SetConsoleOutputCP(65001);
     #endif
+    if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
     RainbowCreateStatusLine("World4");
     RainbowCreateStatusLine("INT32");
     RainbowCreateStatusLine("INT64");
@@ -682,7 +685,7 @@ int test()
 }
 int main(int argc, char const *argv[])
 {
-    compStatu = StatuLineTable(HASH_TABLE_SIZE);//不能删
+    // compStatu = StatuLineTable(HASH_TABLE_SIZE);//不能删
     test();
     putchar('\n');
     RainbowQueueINIT();
@@ -690,14 +693,14 @@ int main(int argc, char const *argv[])
     // while(1)
     // {
     //     scanf("%[^~]",buf);
-        // RainbowLex("*****");
+        // RainbowLex("asafa*WHILE++FOR as*****fgad");
     //     memset(buf,'\0',5000);
     // }
-    RainbowLexerCompiler("demoCompile____.c");
-    printf("compiled");
-    RainbowCompileAllStatusLine();
-    RainbowCompileAllStatusLineSp();
-    RainbowCompileSpMatcher();
+    // RainbowLexerCompiler("demoCompile____.c");
+    // printf("compiled");
+    // RainbowCompileAllStatusLine();
+    // RainbowCompileAllStatusLineSp();
+    // RainbowCompileSpMatcher();
     return 0;
 }
 
