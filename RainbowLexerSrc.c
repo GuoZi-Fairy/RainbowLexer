@@ -9,11 +9,6 @@ typedef struct RainbowError
     char* errorMsg;
     char* errorDoc;
 }RainbowError;
-typedef struct __token__
-{
-    char* token;
-    size_t id;
-}RainbowToken;
 typedef struct queue
 {
     RainbowToken* queue;
@@ -21,9 +16,9 @@ typedef struct queue
     unsigned long long rear;
     unsigned long long front;
 }Rainbowqueue;
-static size_t RainBowLexer_id = 1;
-static size_t RainBowLexer_id_num = 2;
-static size_t RainBowLexer_id_var = 3;
+static size_t RainBowLexer_id;
+static size_t RainBowLexer_id_num;
+static size_t RainBowLexer_id_var;
 #define BUF_SIZE 1024
 #define QUEUE_INIT_SIZE 512;
 static Rainbowqueue RainbowLexer_Ret = {NULL,0,0,0};
@@ -62,8 +57,8 @@ RainbowLexerPrivate(void) RainbowRetAdd(char* token,size_t id)
     tokenElement->token[len] = '\0';
 }
 RainbowLexerPrivate(int) RainbowStatuSperatorMatch(const char* token);
-RainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValiditySp(const char* token);
-RainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValidity(const char* token);
+RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValiditySp(const char* token);
+RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValidity(const char* token);
 
 RainbowLexerPrivate(int) GetStatusOfNum(char ch)
 {
@@ -150,7 +145,7 @@ RainbowLexerPrivate(int) RainbowStatusCheekVarNameValidity(const char* token)
     }
     return status;
 }
-RainbowLexerPrivate(void) RainbowLex(const char* string)
+RainbowLexerPublic(void) RainbowLex(const char* string)
 {
     /* 将string解析
         并加入到ret列表中

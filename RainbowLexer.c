@@ -34,10 +34,28 @@ typedef struct queue
     unsigned long long rear;
     unsigned long long front;
 }Rainbowqueue;
-
+const char header[] = 
+    "#ifndef RAINBOWLEXER__h\n"
+    "#define %s\n"
+    "#ifdef _WIN32\n"
+    "#define RainbowLexerPublic(type) extern type __cdecl\n"
+    "#define RainbowLexerPrivate(type) static type __cdecl\n"
+    "#else\n"
+    "#define RainbowLexerPublic(type) extern type\n"
+    "#define RainbowLexerPrivate(type) static type\n"
+    "#endif\n"
+    "#endif\n"
+    "typedef struct __token__\n"
+    "{\n"
+    "char* token;\n"
+    "size_t id;\n"
+    "}RainbowToken;\n"
+    "RainbowLexerPublic(void) RainbowLex(const char* string);\n"
+    ;
 static RainbowError repeatedErr = {"Repeated tokenRule","Repeated token ->"};
 static RainbowError UndefineToken = {"Undefine token","UNdefine Token ->"};
 static RainbowError MallocError = {"fail malloc","failed to alloc memory"};
+static RainbowError SrcFileUnExist_Error = {"can not find the \"RainbowLexerSrc.c\"","please cheek the srcFile"};
 #define RAINBOW_RAISE(ERROR) printf("ERROR:\n[%s]:%s\n",ERROR.errorMsg,ERROR.errorDoc);
 static size_t RainBowLexer_id;
 static size_t RainBowLexer_id_num;
@@ -540,7 +558,7 @@ RainbowLexerPrivate(void) RainbowCompileSp(rStatu* statu,int defaultID)//用于�
 }
 RainbowLexerPrivate(void) RainbowCompileAllStatusLine()
 {
-    printf("RainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValidity(const char* token){\n");
+    printf("RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValidity(const char* token){\n");
     printf("switch (*token++){\n");
     for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
         if(cheekStatusLine(i))
@@ -559,7 +577,7 @@ RainbowLexerPrivate(void) RainbowCompileAllStatusLine()
 }
 RainbowLexerPrivate(void) RainbowCompileAllStatusLineSp()
 {
-    printf("RainbowLexerPublic(int) RainbowStatusCheekOfStaticWordValiditySp(const char* token){\n");
+    printf("RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValiditySp(const char* token){\n");
     printf("switch (*token++){\n");
     for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
         if(cheekStatusLineSp(i))
@@ -616,14 +634,51 @@ RainbowLexerPrivate(void) RainbowCompileSpMatcher()
     printf("\ndefault:{return -1;break;}");
     printf("}}\n");
 }
-
-RainbowLexerPrivate(void) RainbowLexerCompiler(const char* file_path) //总编译指令
+RainbowLexerPrivate(int) RainbowCompileFilePathCheek(const char* file_path)
 {
-    freopen(file_path,"w",stdout);
-    printf("#include \"RainbowLexerSrc.c\"\n");
+    int len = strlen(file_path);
+    if((file_path[len-1]=='c'||file_path[len-1]=='c')&&(file_path[len-2]=='.'))return 1;
+    else return 0;
+}
+RainbowLexerPrivate(void) RainbowCompileHeader(const char* file_path)
+{
+    char header_file_path[100] =  {'\0'};
+    memcpy(header_file_path,file_path,strlen(file_path)* sizeof(char));
+    for (size_t i = 0; i < 100; i++) header_file_path[i] = (header_file_path[i]==' ' ? '_':toupper(header_file_path[i]));
+    strcat(header_file_path,"__H");
+    printf(header,header_file_path);
+}
+RainbowLexerPrivate(int) RainbowLexerCopySrc(const char* src_path)
+{
+    FILE* fp;
+    if( (fp=fopen(src_path,"rt")) == NULL)
+    {
+        RAINBOW_RAISE(SrcFileUnExist_Error);
+        return -1;
+    }
+    char ch;
+    while( (ch=fgetc(fp)) != EOF ){
+        putchar(ch);
+    }
+    return 0;
+}
+RainbowLexerPrivate(int) RainbowLexerCompiler(const char* file_path) //总编译指令
+{
+    char file[200] = {'\0'};
+    strcpy(file,file_path);
+    if (!RainbowCompileFilePathCheek(file_path)) strcat(file,".c");
+    int len = strlen(file);
+    freopen(file,"w",stdout);
+    file[len - 1] = 'h';//头文件名
+    printf("#include \"%s\"",file);
+
+    if (RainbowLexerCopySrc("RainbowLexerSrc.c"))return -1;
     RainbowCompileAllStatusLine();
     RainbowCompileAllStatusLineSp();
     RainbowCompileSpMatcher();
+    freopen(file,"w",stdout);
+    file[len-2] = '\0';
+    RainbowCompileHeader(file);
     #ifdef _WIN32
     freopen("CON","w",stdout);
     #else
@@ -689,18 +744,19 @@ int main(int argc, char const *argv[])
     test();
     putchar('\n');
     RainbowQueueINIT();
-    char buf[5000] = {'\0'};
+    // char buf[5000] = {'\0'};
     // while(1)
     // {
-    //     scanf("%[^~]",buf);
-        // RainbowLex("asafa*WHILE++FOR as*****fgad");
+    //     scanf("%s",buf);
+    //     // RainbowLex("asafa*WHILE++FOR as*****fgad");
+    //     RainbowLex(buf);
     //     memset(buf,'\0',5000);
     // }
-    // RainbowLexerCompiler("demoCompile____.c");
-    // printf("compiled");
-    // RainbowCompileAllStatusLine();
-    // RainbowCompileAllStatusLineSp();
-    // RainbowCompileSpMatcher();
+    RainbowLexerCompiler("demoCompile____HeaderIncludeTest.c");
+    printf("compiled");
+    RainbowCompileAllStatusLine();
+    RainbowCompileAllStatusLineSp();
+    RainbowCompileSpMatcher();
     return 0;
 }
 
