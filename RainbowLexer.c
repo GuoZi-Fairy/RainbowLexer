@@ -36,7 +36,7 @@ typedef struct queue
 }Rainbowqueue;
 static const char header[] = 
     "%s //DOUBLE OPTION\n"
-    "%s //SIGNAL OPTION\n"
+    "%s //SINGLE OPTION\n"
     "#ifndef RAINBOWLEXER__h\n"
     "#define %s\n"
     "#define IGNORE_MIN (25526)\n"
@@ -72,7 +72,7 @@ static size_t RainBowLexer_id_string;
 #define IGNORE_MAX (35526)
 static char* TokenRule_Now;
 static int double_option;
-static int signal_option;
+static int single_option;
 static rStatu* compStatu;
 static Rainbowqueue RainbowLexer_Ret;
 #define WHITESPACE_SKIP(str) {while(*str==' ')str++;}
@@ -422,18 +422,18 @@ RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValidity(const char* toke
         token++;
     goto recursive_token;
 }
-RainbowLexerPrivate(char*) RainbowStatusCheekOfString(const char* token,char signalORdouble)
+RainbowLexerPrivate(char*) RainbowStatusCheekOfString(const char* token,char singleORdouble)
 {
     const char* ptr = token;
     int len = 0;
-    while (ptr[len] != signalORdouble)
+    while (ptr[len] != singleORdouble)
     {
         if(ptr[len]=='\n'||ptr[len]=='\0')
         {
             RAINBOW_RAISE(StringError);
             return NULL;
         }
-        else if(ptr[len]=='\\' && ptr[len+1]==signalORdouble)len+=1;
+        else if(ptr[len]=='\\' && ptr[len+1]==singleORdouble)len+=1;
         len++;
     }
     char* string = (char*)malloc(len*sizeof(char));
@@ -519,7 +519,7 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
     size_t index = 0;
     while(*strptr != '\0')
     {
-            if((*strptr == '\"'&&double_option)||(*strptr == '\''&& signal_option))
+            if((*strptr == '\"'&&double_option)||(*strptr == '\''&& single_option))
             {
                 if(*buf!='\0')
                 {
@@ -726,7 +726,7 @@ RainbowLexerPrivate(void) RainbowCompileHeader(const char* file_path)
     memcpy(header_file_path,file_path,strlen(file_path)* sizeof(char));
     for (size_t i = 0; i < 100; i++) header_file_path[i] = (header_file_path[i]==' ' ? '_':toupper(header_file_path[i]));
     strcat(header_file_path,"__H");
-    printf(header,double_option?"#define DOUBLE_STRING_OPTION": "",signal_option?"#define SIGNAL_STRING_OPTION": "",header_file_path);
+    printf(header,double_option?"#define DOUBLE_STRING_OPTION": "",single_option?"#define SINGLE_STRING_OPTION": "",header_file_path);
 }
 RainbowLexerPrivate(int) RainbowLexerCopySrc(const char* src_path)
 {
@@ -778,6 +778,8 @@ int test()
     RainbowCreateStatusLine("static",1);
     RainbowCreateStatusLine("sperator",2);
     RainbowCreateStatusLine("__VAR__",25521);
+    RainbowCreateStatusLine("STRING_SINGLE",25520);
+    RainbowCreateStatusLine("STRING_DOUBLE",25520);
     RainbowCreateStatusLine("NUM_INT",2);
     RainbowCreateStatusLineSp("{",11);
     RainbowCreateStatusLineSp("}",12);

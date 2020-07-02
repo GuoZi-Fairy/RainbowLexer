@@ -156,18 +156,18 @@ RainbowLexerPrivate(int) RainbowStatusCheekVarNameValidity(const char* token)
     }
     return status;
 }
-RainbowLexerPrivate(char*) RainbowStatusCheekOfString(const char* token,char signalORdouble)
+RainbowLexerPrivate(char*) RainbowStatusCheekOfString(const char* token,char singleORdouble)
 {
     const char* ptr = token;
     int len = 0;
-    while (ptr[len] != signalORdouble)
+    while (ptr[len] != singleORdouble)
     {
         if(ptr[len]=='\n'||ptr[len]=='\0')
         {
             RAINBOW_RAISE(StringError);
             return NULL;
         }
-        else if(ptr[len]=='\\' && ptr[len+1]==signalORdouble)len+=1;
+        else if(ptr[len]=='\\' && ptr[len+1]==singleORdouble)len+=1;
         len++;
     }
     char* string = (char*)malloc(len*sizeof(char));
@@ -189,14 +189,14 @@ RainbowLexerPublic(void) RainbowLex(const char* string)
     size_t index = 0;
     while(*strptr != '\0')
     {
-            #if defined(DOUBLE_STRING_OPTION) || defined(SIGNAL_STRING_OPTION)
-            #ifdef SIGNAL_STRING_OPTION
+            #if defined(DOUBLE_STRING_OPTION) || defined(SINGLE_STRING_OPTION)
+            #ifdef SINGLE_STRING_OPTION
             if(*strptr == '\'')
             #endif
             #ifdef DOUBLE_STRING_OPTION
             if(*strptr == '\"')
             #endif
-            #if defined(DOUBLE_STRING_OPTION) && defined(SIGNAL_STRING_OPTION)
+            #if defined(DOUBLE_STRING_OPTION) && defined(SINGLE_STRING_OPTION)
             if(*strptr == '\"'||*strptr == '\'')
             #endif
             {
@@ -215,13 +215,13 @@ RainbowLexerPublic(void) RainbowLex(const char* string)
                         putchar('\n');
                     }
                 }
-                #ifdef SIGNAL_STRING_OPTION
+                #ifdef SINGLE_STRING_OPTION
                 char* string = RainbowStatusCheekOfString(strptr+1,'\'');
                 #endif
                 #ifdef DOUBLE_STRING_OPTION
                 char* string = RainbowStatusCheekOfString(strptr+1,'\"');
                 #endif
-                #if defined(DOUBLE_STRING_OPTION) && defined(SIGNAL_STRING_OPTION)
+                #if defined(DOUBLE_STRING_OPTION) && defined(SINGLE_STRING_OPTION)
                 char* string = RainbowStatusCheekOfString(strptr+1,*strptr== '\"' ? '\"' : '\'');
                 #endif
                 if(string == NULL)return;
