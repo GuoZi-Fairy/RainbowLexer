@@ -1,10 +1,10 @@
 "filename", "language", "C", "C++", "Markdown", "comment", "blank", "total"
 "d:\projects\RainbowLexer\README.md", "Markdown", 0, 0, 93, 0, 8, 101
-"d:\projects\RainbowLexer\RainbowLexer.c", "C", 578, 0, 0, 62, 22, 662
+"d:\projects\RainbowLexer\RainbowLexer.c", "C", 695, 0, 0, 71, 25, 791
 "d:\projects\RainbowLexer\RainbowLexer.h", "C++", 0, 10, 0, 0, 0, 10
-"d:\projects\RainbowLexer\RainbowLexerSrc.c", "C", 196, 0, 0, 5, 9, 210
+"d:\projects\RainbowLexer\RainbowLexerSrc.c", "C", 196, 0, 0, 5, 10, 211
 "d:\projects\RainbowLexer\compileRes.c", "C", 340, 0, 0, 0, 35, 375
-"d:\projects\RainbowLexer\demoCompile.c", "C", 286, 0, 0, 0, 2, 288
-"d:\projects\RainbowLexer\demoCompileTest.c", "C", 256, 0, 0, 5, 7, 268
-"d:\projects\RainbowLexer\demoCompile____.c", "C", 76, 0, 0, 0, 2, 78
-"Total", "-", 1732, 10, 93, 72, 85, 1992
+"d:\projects\RainbowLexer\demoCompile____HeaderIncludeTest.c", "C", 616, 0, 0, 7, 10, 633
+"d:\projects\RainbowLexer\demoCompile____HeaderIncludeTest.h", "C++", 0, 16, 0, 0, 1, 17
+"d:\projects\RainbowLexer\test.c", "C", 8, 0, 0, 0, 1, 9
+"Total", "-", 1855, 26, 93, 83, 90, 2147

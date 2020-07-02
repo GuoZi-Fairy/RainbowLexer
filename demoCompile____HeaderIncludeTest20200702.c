@@ -1,4 +1,4 @@
-
+#include "demoCompile____HeaderIncludeTest20200702.h"
 #include "RainbowLexer.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -294,4 +294,90 @@ RainbowLexerPrivate(void) RainbowQueueClear()
     RainbowLexer_Ret.front = 0;
     RainbowLexer_Ret.size = QUEUE_INIT_SIZE;
     RainbowLexer_Ret.queue = (RainbowToken*)realloc(RainbowLexer_Ret.queue,RainbowLexer_Ret.size);
+}RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValidity(const char* token){
+switch (*token++){
+case 'N':{switch (*token++) {
+case 'U':{switch (*token++) {
+case 'M':{switch (*token++) {
+case '_':{switch (*token++) {
+case 'I':{switch (*token++) {
+case 'N':{return 2;break;}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}case '_':{switch (*token++) {
+case '_':{switch (*token++) {
+case 'V':{switch (*token++) {
+case 'A':{switch (*token++) {
+case 'R':{switch (*token++) {
+case '_':{return 25521;break;}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}case 's':{switch (*token++) {
+case 't':{switch (*token++) {
+case 'a':{switch (*token++) {
+case 't':{switch (*token++) {
+case 'i':{return 1;break;}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}case 'p':{switch (*token++) {
+case 'e':{switch (*token++) {
+case 'r':{switch (*token++) {
+case 'a':{switch (*token++) {
+case 't':{switch (*token++) {
+case 'o':{return 2;break;}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}
+default:{return -1;break;}}
+}default:return -1;
+break;}}
+RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValiditySp(const char* token){
+switch (*token++){
+case '\n':{return 25529;break;}case ' ':{return 25528;break;}case '-':{return 13;break;}case '{':{return 11;break;}case '}':{return 12;break;}default:return -1;
+break;}}
+RainbowLexerPrivate(int) RainbowStatuSperatorMatch(const char* token){
+int id = RainbowStatusCheekOfStaticWordValiditySp(token);
+switch (id){
+case 25529:{return 0;break;}
+case 25528:{return 0;break;}
+case 13:{return 0;break;}
+case 11:{return 0;break;}
+case 12:{return 0;break;}
+
+default:{return -1;break;}}}
+int main(int argc, char const *argv[])
+{
+    RainbowQueueINIT();
+    RainbowLex("ahhhh\"hello world\\\"yes\"please-{hhhhh}");
+    RainbowToken* tokens;
+    while ((tokens=RainbowNext())!=NULL)
+    {
+        printf("[%s] with id:%ld\n",tokens->token,tokens->id);
+    }
+    RainbowQueueClear();
+    return 0;
 }
