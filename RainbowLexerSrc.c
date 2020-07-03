@@ -1,5 +1,4 @@
 
-#include "RainbowLexer.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -183,21 +182,22 @@ RainbowLexerPublic(void) RainbowLex(const char* string)
     /* 将string解析
         并加入到ret列表中
     */
+    if(RainbowLexer_Ret.queue == NULL)RainbowQueueINIT();
     const char* strptr = string;
     WHITESPACE_SKIP(strptr);
     char buf[BUF_SIZE] = {'\0'};
     size_t index = 0;
     while(*strptr != '\0')
     {
-            #if defined(DOUBLE_STRING_OPTION) || defined(SINGLE_STRING_OPTION)
-            #ifdef SINGLE_STRING_OPTION
-            if(*strptr == '\'')
+        #if defined(DOUBLE_STRING_OPTION) || defined(SINGLE_STRING_OPTION) 
+            #if !defined(DOUBLE_STRING_OPTION) && defined(SINGLE_STRING_OPTION) 
+                    char *string = RainbowStatusCheekOfString(strptr + 1, '\'');
             #endif
-            #ifdef DOUBLE_STRING_OPTION
-            if(*strptr == '\"')
+            #if defined(DOUBLE_STRING_OPTION) && !defined(SINGLE_STRING_OPTION)
+                    char *string = RainbowStatusCheekOfString(strptr + 1, '\"');
             #endif
             #if defined(DOUBLE_STRING_OPTION) && defined(SINGLE_STRING_OPTION)
-            if(*strptr == '\"'||*strptr == '\'')
+                    char *string = RainbowStatusCheekOfString(strptr + 1, *strptr == '\"' ? '\"' : '\'');
             #endif
             {
                 if(*buf!='\0')
@@ -215,10 +215,10 @@ RainbowLexerPublic(void) RainbowLex(const char* string)
                         putchar('\n');
                     }
                 }
-                #ifdef SINGLE_STRING_OPTION
+                #if !defined(DOUBLE_STRING_OPTION) && defined(SINGLE_STRING_OPTION) 
                 char* string = RainbowStatusCheekOfString(strptr+1,'\'');
                 #endif
-                #ifdef DOUBLE_STRING_OPTION
+                #if defined(DOUBLE_STRING_OPTION) && !defined(SINGLE_STRING_OPTION)
                 char* string = RainbowStatusCheekOfString(strptr+1,'\"');
                 #endif
                 #if defined(DOUBLE_STRING_OPTION) && defined(SINGLE_STRING_OPTION)
@@ -295,3 +295,4 @@ RainbowLexerPrivate(void) RainbowQueueClear()
     RainbowLexer_Ret.size = QUEUE_INIT_SIZE;
     RainbowLexer_Ret.queue = (RainbowToken*)realloc(RainbowLexer_Ret.queue,RainbowLexer_Ret.size);
 }
+

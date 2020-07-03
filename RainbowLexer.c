@@ -3,10 +3,11 @@
 #include<string.h>
 #include<limits.h>
 #include<ctype.h>
+#include"RainbowLexer.h"
+#include "RainbowLexerFront.h"
 #ifdef _WIN32
     #include<Windows.h>
 #endif
-#include"RainbowLexer.h"
 #define INIT_ID (-1) 
 #define HASH_TABLE_SIZE 512
 typedef struct RainbowStatusLine
@@ -57,20 +58,34 @@ static const char header[] =
     "RainbowLexerPublic(void) RainbowLex(const char* string);\n"
     "RainbowLexerPublic(RainbowToken*) RainbowNext();\n"
     ;
-static RainbowError repeatedErr = {"Repeated tokenRule","Repeated token ->"};
-static RainbowError UndefineToken = {"Undefine token","UNdefine Token ->"};
-static RainbowError MallocError = {"fail malloc","failed to alloc memory"};
-static RainbowError StringError = {"Expected \"","can not match \""};
-static RainbowError SrcFileUnExist_Error = {"can not find the \"RainbowLexerSrc.c\"","please cheek the srcFile"};
+
+static const char help[] = 
+    "-c RL_File [C_object_File]\n\t[compile RL_File to C_objext_File]\n"
+    "\t\t--if there is no C_object_File input, it will be compiled to the work path]\n"
+    "-d [RL_File]\n\t[Debug the RL_File or get into Shell_MODE]\n"
+    "\t\t--The Shell_MODE include command following:\n"
+    "\t\t\tregSw [\"Sw_Word\"] [id/ignore] --This command will Register a Sw_Word with [id/be ignored]\n"
+    "\t\t\tregSp [\"Sp_Word\"] [id/ignore] --This command will Register a Sp_Word wile [id/be ignored]\n"
+    "\t\t\tLex [\"string\"] --This command will Lex the String by the rule you have Registered\n"
+    "\t\t\tDel [id] --This command will Delete the id of rule\n"
+    "\t\t\tShow --This command will display all the rules on screen\n";
+
+static const RainbowError repeatedErr = {"Repeated tokenRule","Repeated token ->"};
+static const RainbowError UndefineToken = {"Undefine token","UNdefine Token ->"};
+static const RainbowError MallocError = {"fail malloc","failed to alloc memory"};
+static const RainbowError StringError = {"Expected \"","can not match \""};
+static const RainbowError SrcFileUnExist_Error = {"can not find the \"RainbowLexerSrc.c\"","please cheek the srcFile"};
 #define RAINBOW_RAISE(ERROR) printf("ERROR:\n[%s]:%s\n",ERROR.errorMsg,ERROR.errorDoc);
-static size_t RainBowLexer_id;
-static size_t RainBowLexer_id_num;
-static size_t RainBowLexer_id_var;
-static size_t RainBowLexer_id_string;
+static long long RainBowLexer_id;
+static long long RainBowLexer_id_num;
+static long long RainBowLexer_id_var;
+static long long RainBowLexer_id_string;
+static long long RainBowLexer_id_ignore = 25526;
+#define RB_ignore (RainBowLexer_id_ignore++)
 //ignore的id范围为[25526,35526]
 #define IGNORE_MIN (25526)
 #define IGNORE_MAX (35526)
-static char* TokenRule_Now;
+static  const char* TokenRule_Now;
 static int double_option;
 static int single_option;
 static rStatu* compStatu;
@@ -117,6 +132,12 @@ RainbowLexerPrivate(void) RainbowStatuLineParse(rStatu** statu,const char* token
     {
         if((*statu)->initChar == *token)
         {
+            if(*(token+1)=='\0' && (*statu)->id == INIT_ID)//提前判断 防止递归后错误判断重复情况
+            {
+                //该条件下 token已经完结 但statu无对应id 则该情况可创建
+                (*statu)->id = RainBowLexer_id;
+                return;
+            }
             RainbowStatuLineParse(&((*statu)->table),token+1);
             return;
         }
@@ -145,10 +166,11 @@ RainbowLexerPrivate(void) RainbowStatuLineParse(rStatu** statu,const char* token
         statu = &((*statu)->table);
         *statu = NULL;
     }
-    (*lastestStatu)->id = RainBowLexer_id++;
+    (*lastestStatu)->id = RainBowLexer_id;
 }
 RainbowLexerPrivate(void) RainbowCreateStatusLine(const char* token,int id) //将静态token转化为状态机并加入hash中
 {
+    TokenRule_Now = token;
     const char* parser = token;
     RainBowLexer_id = id;
     rStatu* statuLine =  StatuLineTable(*parser);
@@ -238,7 +260,7 @@ RainbowLexerPrivate(void) RainbowStatuLineParseSp(rStatu** statu,const char* tok
         statu = &((*statu)->table);
         *statu = NULL;
     }
-    (*lastestStatu)->id = RainBowLexer_id++;
+    (*lastestStatu)->id = RainBowLexer_id;
 }
 RainbowLexerPrivate(int) cheekStatusLineSp(unsigned int initCh) //检查以InitCh为索引的状态链是否存在
 {
@@ -249,6 +271,7 @@ RainbowLexerPrivate(int) cheekStatusLineSp(unsigned int initCh) //检查以InitC
 }
 RainbowLexerPrivate(void) RainbowCreateStatusLineSp(const char* token,int id) //将静态token转化为状态机并加入hash中
 {
+    TokenRule_Now = token;
     const char* parser = token;
     RainBowLexer_id = id;
     rStatu* statuLine =  StatuLineTableSp(*parser);
@@ -519,7 +542,7 @@ RainbowLexerPrivate(void) RainbowLex(const char* string)
     size_t index = 0;
     while(*strptr != '\0')
     {
-            if((*strptr == '\"'&&double_option)||(*strptr == '\''&& single_option))
+            if((*strptr == '\"'&&double_option)||(*strptr == '\''&& single_option))//处理字符串
             {
                 if(*buf!='\0')
                 {
@@ -766,57 +789,117 @@ RainbowLexerPrivate(int) RainbowLexerCompiler(const char* file_path) //总编译
     freopen("/dev/console","w",stdout);
     #endif
 }
-int test()
+
+
+int FrontCompileConfig()
 {
-    RainBowLexer_id_num = 25525;
-    RainBowLexer_id_var = 25524;
+    RainBowLexer_id_num = 21;
+    RainBowLexer_id_var = 22;
     //ignore的id范围为[25526,35526]
-    RainBowLexer_id_string = 25523;
+    RainBowLexer_id_string = 23;
     #ifdef _WIN32
     SetConsoleOutputCP(65001);
     #endif
-    RainbowCreateStatusLine("static",1);
+    RainbowCreateStatusLine("staticWord",1);
+    RainbowCreateStatusLine("sw",1);
     RainbowCreateStatusLine("sperator",2);
-    RainbowCreateStatusLine("__VAR__",25521);
-    RainbowCreateStatusLine("STRING_SINGLE",25520);
-    RainbowCreateStatusLine("STRING_DOUBLE",25520);
-    RainbowCreateStatusLine("NUM_INT",2);
+    RainbowCreateStatusLine("sp",2);
+    RainbowCreateStatusLine("IGNORE",3);
+    RainbowCreateStatusLine("__VAR__",11);
+    RainbowCreateStatusLine("STRING_SINGLE",12);
+    RainbowCreateStatusLine("STRING_DOUBLE",13);
+    RainbowCreateStatusLine("NUMBER",14);
     RainbowCreateStatusLineSp("{",11);
     RainbowCreateStatusLineSp("}",12);
-    RainbowCreateStatusLineSp("-",13);
-    RainbowCreateStatusLineSp(" ",25528);
-    RainbowCreateStatusLineSp("\n",25529);
-    
+    RainbowCreateStatusLineSp("[",13);
+    RainbowCreateStatusLineSp("]",14);
+    RainbowCreateStatusLineSp("-",15);
+    RainbowCreateStatusLineSp(",",16);
+    RainbowCreateStatusLineSp(":",17);
+    RainbowCreateStatusLineSp("\"",18);
+    RainbowCreateStatusLineSp(" ",RB_ignore);
+    RainbowCreateStatusLineSp("\n",RB_ignore);
+    RainbowCreateStatusLineSp("\t",RB_ignore);
     
     return 0;
 }
+// int mainForFront(int argc, char const *argv[])
+// {
+//         if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
+//         FrontCompileConfig();
+//         RainbowQueueINIT();
+//         double_option = 1;
+//         single_option = 1;
+//         RainbowLexerCompiler("RainbowLexerFront");
+//         printf("compiled");
+//     return 0;
+// }
+
+
+#include "RainbowLexerFront.c"
+//TODO : 完成解析文件和Shell操作
+RainbowLexerPrivate(void) ParseFile(const char* file)
+{
+
+}
+
+RainbowLexerPrivate(void) CompileFile(const char* file)
+{
+
+}
+
+RainbowLexerPrivate(void) Shell()
+{
+
+}
+
+
 int main(int argc, char const *argv[])
 {
-        if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
-        test();
-//      putchar('\n');
-        RainbowQueueINIT();
-        double_option = 1;
-//     // char buf[5000] = {'\0'};
-//     // while(1)
-//     // {
-//     //     scanf("%s",buf);
-        //    RainbowLex("ahhhh\"hello world\\\"yes\"please-{hhhhh}");
-        //    RainbowToken* tokens;
-        //    while ((tokens=RainbowNext())!=NULL)
-        //    {
-        //        printf("[%s] with id:%ld\n",tokens->token,tokens->id);
-        //    }
-           
-//     //     RainbowLex(buf);
-//     //     memset(buf,'\0',5000);
-//     // }
-        RainbowLexerCompiler("demoCompile____HeaderIncludeTest20200702.c");
-//     // printf("compiled");
+    if(argc == 1)//无参数时输出help菜单
+    {
+        printf("%s",help);
+        return 0;
+    }
+    switch (argv[1][0])
+    {
+        case '-':
+        {        
+            switch (argv[1][1])
+            {
+                case 'C':
+                case 'c':
+                {
+                    if(argc <= 2)
+                    {
+                        printf("There is no input file ^");
+                        return 0;
+                    }
+                    CompileFile(argv[2]);
+                    return 0;
+                    break;
+                }
+                case 'D':
+                case 'd':
+                {
+                    if(argc <=2)
+                    {
+                        Shell();
+                        return 0;
+                    }
+                    ParseFile(argv[2]);
+                    return 0;
+                    break;
+                }
+                default:
+                {
+                    printf("Invaild Parameter %s",argv[1]);
+                    return 0;
+                    break;
+                }
+            }
+            break;
+        }
+    }
     return 0;
 }
-
-
-//TODO
-// 解决* ***的符号匹配
-//目前问题 调试模式下可以正确匹配*  编译运行下无法匹配*
