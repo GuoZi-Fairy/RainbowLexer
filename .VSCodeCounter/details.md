@@ -1,10 +1,10 @@
 # Details
 
-Date : 2020-07-03 13:47:17
+Date : 2020-07-04 15:31:35
 
 Directory d:\projects\RainbowLexer
 
-Total : 11 files,  3701 codes, 79 comments, 102 blanks, all 3882 lines
+Total : 11 files,  3884 codes, 91 comments, 112 blanks, all 4087 lines
 
 [summary](results.md)
 
@@ -12,9 +12,9 @@ Total : 11 files,  3701 codes, 79 comments, 102 blanks, all 3882 lines
 | filename | language | code | comment | blank | total |
 | :--- | :--- | ---: | ---: | ---: | ---: |
 | [README.md](/README.md) | Markdown | 93 | 0 | 8 | 101 |
-| [RainbowLexer.c](/RainbowLexer.c) | C | 786 | 53 | 23 | 862 |
+| [RainbowLexer.c](/RainbowLexer.c) | C | 1,001 | 65 | 33 | 1,099 |
 | [RainbowLexer.h](/RainbowLexer.h) | C++ | 10 | 0 | 0 | 10 |
-| [RainbowLexerFront.c](/RainbowLexerFront.c) | C | 718 | 4 | 5 | 727 |
+| [RainbowLexerFront.c](/RainbowLexerFront.c) | C | 686 | 4 | 5 | 695 |
 | [RainbowLexerFront.h](/RainbowLexerFront.h) | C++ | 11 | 0 | 0 | 11 |
 | [RainbowLexerSrc.c](/RainbowLexerSrc.c) | C | 283 | 6 | 10 | 299 |
 | [compileRes.c](/compileRes.c) | C | 340 | 0 | 35 | 375 |

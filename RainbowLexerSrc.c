@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <limits.h>
 typedef struct RainbowError
 {
     char* errorMsg;
@@ -15,12 +16,14 @@ typedef struct queue
     unsigned long long rear;
     unsigned long long front;
 }Rainbowqueue;
-static size_t RainBowLexer_id;
-static size_t RainBowLexer_id_num;
-static size_t RainBowLexer_id_var;
-static size_t RainBowLexer_id_string;
+static long long RainBowLexer_id;
+static long long RainBowLexer_id_num;
+static long long RainBowLexer_id_var;
+static long long RainBowLexer_id_string;
 #define BUF_SIZE 1024
 #define QUEUE_INIT_SIZE 512;
+#define IGNORE_MIN (LLONG_MAX-10000)
+#define IGNORE_MAX (LLONG_MAX)
 static Rainbowqueue RainbowLexer_Ret = {NULL,0,0,0};
 static RainbowError repeatedErr = {"Repeated tokenRule","Repeated token ->"};
 static RainbowError UndefineToken = {"Undefine token","UNdefine Token ->"};
@@ -66,9 +69,9 @@ RainbowLexerPrivate(void) RainbowRetAdd(char* token,size_t id)
     }
     tokenElement->token[len] = '\0';
 }
-RainbowLexerPrivate(int) RainbowStatuSperatorMatch(const char* token);
-RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValiditySp(const char* token);
-RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValidity(const char* token);
+RainbowLexerPrivate(long long) RainbowStatuSperatorMatch(const char* token);
+RainbowLexerPrivate(long long) RainbowStatusCheekOfStaticWordValiditySp(const char* token);
+RainbowLexerPrivate(long long) RainbowStatusCheekOfStaticWordValidity(const char* token);
 
 RainbowLexerPrivate(int) GetStatusOfNum(char ch)
 {
@@ -202,7 +205,7 @@ RainbowLexerPublic(void) RainbowLex(const char* string)
             {
                 if(*buf!='\0')
                 {
-                    int id = 0;
+                    long long id = 0;
                     id = RainbowStatusCheekOfStaticWordValidity(buf);
                     if(id >= 0) RainbowRetAdd(buf,id);
                     else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_var);
@@ -235,7 +238,7 @@ RainbowLexerPublic(void) RainbowLex(const char* string)
             if(buf[0] == '\0' && spRet >= 0) goto BUF_EMPTY_CASE_;//处理第一个字符是分隔符的情况
             if(spRet >= 0)
             {   
-                int id = 0;
+                long long id = 0;
                 id = RainbowStatusCheekOfStaticWordValidity(buf);
                 if(id >= 0) RainbowRetAdd(buf,id);
 
@@ -264,7 +267,7 @@ RainbowLexerPublic(void) RainbowLex(const char* string)
     if(*buf == '\0')return;//buf已空  情况出现在最后一个字符是分隔符时
 
     //清理buf
-    int id = 0;
+    long long id = 0;
     id = RainbowStatusCheekOfStaticWordValidity(buf);
     if(id >= 0) RainbowRetAdd(buf,id);
     else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1))RainbowRetAdd(buf,RainBowLexer_id_num);
