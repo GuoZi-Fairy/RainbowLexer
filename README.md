@@ -6,62 +6,60 @@ RainbowLexer可以基于 *RL文件所描述的规则* 调试你的 *被解析目
 RainbowLexer可以编译出对应 *RL文件所描述的规则* 对应的C文件，其中包含可以解析对应文档的C代码.
 ## 目录
 - [RainbowLexer](#rainbowlexer)
-  - [简介📃](#%e7%ae%80%e4%bb%8b%f0%9f%93%83)
-  - [目录](#%e7%9b%ae%e5%bd%95)
-  - [RL文件描述规则✏](#rl%e6%96%87%e4%bb%b6%e6%8f%8f%e8%bf%b0%e8%a7%84%e5%88%99%e2%9c%8f)
-    - [例如](#%e4%be%8b%e5%a6%82)
-    - [正则表达式描述](#%e6%ad%a3%e5%88%99%e8%a1%a8%e8%be%be%e5%bc%8f%e6%8f%8f%e8%bf%b0)
-  - [使用方法](#%e4%bd%bf%e7%94%a8%e6%96%b9%e6%b3%95)
-    - [编译文件使用说明](#%e7%bc%96%e8%af%91%e6%96%87%e4%bb%b6%e4%bd%bf%e7%94%a8%e8%af%b4%e6%98%8e)
-  - [开发手册](#%e5%bc%80%e5%8f%91%e6%89%8b%e5%86%8c)
-  - [开源声明](#%e5%bc%80%e6%ba%90%e5%a3%b0%e6%98%8e)
-  - [帮助](#%e5%b8%ae%e5%8a%a9)
+  - [简介📃](#简介)
+  - [目录](#目录)
+  - [RL文件描述规则✏](#rl文件描述规则)
+    - [例如](#例如)
+  - [使用方法](#使用方法)
+    - [编译文件使用说明](#编译文件使用说明)
+  - [开发手册](#开发手册)
+  - [开源声明](#开源声明)
+  - [帮助](#帮助)
   - [](#)
 
 
 ## RL文件描述规则✏
 每一个词法描述单元应以如下方式定义\
-```
-id-name-[sperator/static] {
-    ...
-}
+```C
+type union index_series;
+// 说明: 
+// type 为 静态词和分隔词
+//    静态词type为 sw/staticWord
+//    分隔词type为 sp/sperator
+// union 为 集合单词
+// index_series 为id序列
+//    例如[1,2,3,4]对应4个词素id分别为1，2，3，4
+//        [4:]表示任意数量词素 id 从4递增
+//        [:4]表示任意数量词素 id 从4逆向递减
+//        [:]表示任意数量词素  id 从0递增
+//        IGNORE 表示该词素不会进入结果列表
 ```
 ### 例如
 ```
-1-keyword_for-static {
-    for
-}
-2-keyword_while-static {
-    while
-}
-3-keyword_define-static {
-    define
-}
-4-var-static {
-    {__VAR__}
+sw {"hello","world","test","hel"} [1,2,3,4];
+sw {"dididi","hahaha","ppp",__VAR__} [4:];
+sp {"%","/","*"} [20:];
+sp {" ","\n","\t"} IGNORE;
 }
 ```
+需要注意的是 任何词素都需要用" "包裹\
 提供了一些已经定义的集合描述\
 * __VAR__ 通用合法变量名集合
-* __NUM_INT__ 通用合法整数集合
-* __NUM_FLOAT__ 通用合法浮点数集合
+* NUMBER 通用合法数集合
 * __STRING_DOUBLE__ 通用双引号包括字符串
 * __STRING_SINGLE__ 通用单引号包括字符串
-* __WORD__ 任意纯字母集合
 若希望引用上述集合，请在描述中以`{}`包括上述集合
 \
 对单一单词的集合可以简写为
 ```
-id-name-[sperator/static] token
+type "token" id
 ```
 
-### 正则表达式描述
-暂未添加
 ## 使用方法
 在命令行中使用\
 参数列表\
-* -DEBUG [file.RL] >>开启调试模式(**不编译，可以单句为单位解析，也可以读入文件**)
-* -COMPILE file.RL outputFile.c >>编译模式(**将file.RL编译为outputfile.c**)
+* -D [file.RL] >>开启调试模式(**不编译，可以单句为单位解析，也可以读入文件**)
+* -C file.RL >>编译模式(**将file.RL编译为outputfile.c**)
 
 ### 编译文件使用说明
 对于编译所得的C文件,其中包含3个接口
