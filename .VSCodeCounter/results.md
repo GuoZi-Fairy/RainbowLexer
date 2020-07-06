@@ -1,23 +1,23 @@
 # Summary
 
-Date : 2020-07-04 15:31:35
+Date : 2020-07-06 11:07:23
 
 Directory d:\projects\RainbowLexer
 
-Total : 11 files,  3884 codes, 91 comments, 112 blanks, all 4087 lines
+Total : 13 files,  4729 codes, 166 comments, 126 blanks, all 5021 lines
 
 [details](details.md)
 
 ## Languages
 | language | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| C | 6 | 3,734 | 90 | 102 | 3,926 |
+| C | 7 | 4,560 | 163 | 115 | 4,838 |
 | Markdown | 1 | 93 | 0 | 8 | 101 |
-| C++ | 4 | 57 | 1 | 2 | 60 |
+| C++ | 5 | 76 | 3 | 3 | 82 |
 
 ## Directories
 | path | files | code | comment | blank | total |
 | :--- | ---: | ---: | ---: | ---: | ---: |
-| . | 11 | 3,884 | 91 | 112 | 4,087 |
+| . | 13 | 4,729 | 166 | 126 | 5,021 |
 
 [details](details.md)

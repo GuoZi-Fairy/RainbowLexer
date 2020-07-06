@@ -16,14 +16,11 @@ typedef struct queue
     unsigned long long rear;
     unsigned long long front;
 }Rainbowqueue;
-static long long RainBowLexer_id;
-static long long RainBowLexer_id_num;
-static long long RainBowLexer_id_var;
-static long long RainBowLexer_id_string;
+static long long RainBowLexer_id_num = ID_NUM;
+static long long RainBowLexer_id_var = ID_VAR;
+static long long RainBowLexer_id_string = ID_STRING;
 #define BUF_SIZE 1024
 #define QUEUE_INIT_SIZE 512;
-#define IGNORE_MIN (LLONG_MAX-10000)
-#define IGNORE_MAX (LLONG_MAX)
 static Rainbowqueue RainbowLexer_Ret = {NULL,0,0,0};
 static RainbowError repeatedErr = {"Repeated tokenRule","Repeated token ->"};
 static RainbowError UndefineToken = {"Undefine token","UNdefine Token ->"};
@@ -43,7 +40,7 @@ RainbowLexerPrivate(void) RainbowQueueINIT()
     RainbowLexer_Ret.size = QUEUE_INIT_SIZE;
     RainbowLexer_Ret.queue = (RainbowToken*)malloc(RainbowLexer_Ret.size*sizeof(RainbowToken));
 }
-RainbowLexerPrivate(void) RainbowRetAdd(char* token,size_t id)
+RainbowLexerPrivate(void) RainbowRetAdd(char* token,long long id)
 {
     // printf("[%s] with %ld\n",token,id);
     if(id >= IGNORE_MIN && id <= IGNORE_MAX)return;

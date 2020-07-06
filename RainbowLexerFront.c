@@ -504,29 +504,20 @@ long long RainbowFrontStatusCheekOfStaticWordValiditySp(const char *token)
 {
     switch (*token++)
     {
-    case '\\':
+    case '\t':
     {
-        switch (*token++)
-        {
-        case 't':
-        {
-            return 25528;
-            break;
-        }
+        return 2147473648;
+        break;
+    }
 
-        case 'n':
-        {
-            return 25527;
-            break;
-        }
-        default:
-            return -1;
-            break;
-        }
+    case '\n':
+    {
+        return 2147473647;
+        break;
     }
     case ' ':
     {
-        return 25526;
+        return 2147473649;
         break;
     }
     case ',':
@@ -579,9 +570,9 @@ int RainbowFrontStatuSperatorMatch(const char *token)
     int id = RainbowFrontStatusCheekOfStaticWordValiditySp(token);
     switch (id)
     {
-    case 25528:
-    case 25527:
-    case 25526:
+    case 2147473647:
+    case 2147473648:
+    case 2147473649:
     case 21:
     case 20:
     case 19:
