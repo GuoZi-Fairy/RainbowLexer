@@ -881,7 +881,7 @@ RainbowLexerPrivate(int) RainbowLexerCompiler(const char* file_path) //总编译
     file[len - 1] = 'h';//头文件名
     printf("#include \"%s\"",file);
 
-    if (RainbowLexerCopySrc("RainbowLexerSrc.c"))return -1;
+    if (RainbowLexerCopySrc("RainbowLexerSrc"))return -1;
     RainbowCompileAllStatusLine();
     RainbowCompileAllStatusLineSp();
     RainbowCompileSpMatcher();
