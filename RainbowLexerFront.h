@@ -5,7 +5,7 @@
 #define RainbowLexerPublic(type) extern type
 #define RainbowLexerPrivate(type) static type
 #endif
-RainbowLexerPublic(int) RainbowFrontStatuSperatorMatch(const char *token);
-RainbowLexerPublic(int) RainbowFrontStatusCheekOfStaticWordValiditySp(const char *token);
-RainbowLexerPublic(int) RainbowFrontStatusCheekOfStaticWordValidity(const char *token);
+RainbowLexerPublic(long long) RainbowFrontStatuSperatorMatch(const char *token);
+RainbowLexerPublic(long long) RainbowFrontStatusCheekOfStaticWordValiditySp(const char *token);
+RainbowLexerPublic(long long) RainbowFrontStatusCheekOfStaticWordValidity(const char *token);
 RainbowLexerPublic(void) RainbowFrontLex(const char* string);

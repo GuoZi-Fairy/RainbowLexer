@@ -941,7 +941,7 @@ int FrontCompileConfig()
 // }
 
 
-#include "RainbowLexerFront.c"
+#include "RainbowLexerFront"
 //TODO : 完成解析文件和Shell操作
 
 #define MAX_BUF_SIZE_OF_FRONT (2048)
@@ -1302,6 +1302,7 @@ RainbowLexerPrivate(int) ParseFile(const char* file)
 }
 RainbowLexerPrivate(void) CompileFile(const char* file)
 {
+    printf("%s ",file);
     char filePath[1000] = {'\0'};
     strcpy(filePath,file);
     int len = strlen(filePath);
