@@ -590,15 +590,7 @@ int RainbowFrontStatuSperatorMatch(const char *token)
     }
     }
 }
-int RainbowCheekID_DELET(long long id,long long *id_list)
-{
-    while (*id_list!=-1)
-    {
-        if(id == *id_list)return 1;
-        id_list++;
-    }
-    return 0;
-}
+
 void RainbowFrontLex(const char* string,long long* id_list)
 {
     /* 将string解析
@@ -610,7 +602,7 @@ void RainbowFrontLex(const char* string,long long* id_list)
     size_t index = 0;
     while(*strptr != '\0')
     {
-            if(*strptr == '\"'&& !(RainbowCheekID_DELET(RainBowLexer_id_string,id_list)))//处理字符串
+            if(*strptr == '\"'&&)//处理字符串
             {
                 if(*buf!='\0')
                 {
@@ -618,9 +610,9 @@ void RainbowFrontLex(const char* string,long long* id_list)
                     id = RainbowFrontStatusCheekOfStaticWordValidity(buf);
                     if(RainbowCheekID_DELET(id,id_list))id = -1;
                     if(id >= 0) RainbowRetAdd(buf,id,&RainbowFrontLexer_Ret);
-                    else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1)&& (RainBowLexer_id_var!=-1) && !(RainbowCheekID_DELET(RainBowLexer_id_var,id_list)))
+                    else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1)&& (RainBowLexer_id_var!=-1))
                         RainbowRetAdd(buf,RainBowLexer_id_var,&RainbowFrontLexer_Ret);
-                    else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1)&& (RainBowLexer_id_num!=-1) && !(RainbowCheekID_DELET(RainBowLexer_id_var,id_list)))
+                    else if(isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1)&& (RainBowLexer_id_num!=-1))
                         RainbowRetAdd(buf,RainBowLexer_id_num,&RainbowFrontLexer_Ret);
                     else//错误处理
                     {
@@ -646,9 +638,9 @@ void RainbowFrontLex(const char* string,long long* id_list)
                 id = RainbowFrontStatusCheekOfStaticWordValidity(buf);
                 if(RainbowCheekID_DELET(id,id_list))id = -1;
                 if(id >= 0) RainbowRetAdd(buf,id,&RainbowFrontLexer_Ret);
-                else if(*buf != '\0' && isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1)&&RainBowLexer_id_var!=-1&& !(RainbowCheekID_DELET(RainBowLexer_id_var,id_list)))
+                else if(*buf != '\0' && isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1)&&RainBowLexer_id_var!=-1)
                     RainbowRetAdd(buf,RainBowLexer_id_var,&RainbowFrontLexer_Ret);
-                else if(*buf != '\0' && isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1)&&RainBowLexer_id_num!=-1&& !(RainbowCheekID_DELET(RainBowLexer_id_var,id_list)))
+                else if(*buf != '\0' && isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1)&&RainBowLexer_id_num!=-1)
                     RainbowRetAdd(buf,RainBowLexer_id_num,&RainbowFrontLexer_Ret);
                 else if(*buf == '\0')goto BUF_EMPTY_CASE_;//用于处理多个连续分隔符的情况
                 else//错误处理
@@ -676,9 +668,9 @@ void RainbowFrontLex(const char* string,long long* id_list)
     long long id = 0;
     id = RainbowFrontStatusCheekOfStaticWordValidity(buf);
     if(id >= 0) RainbowRetAdd(buf,id,&RainbowFrontLexer_Ret);
-    else if(*buf != '\0' && isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1)&&RainBowLexer_id_var!=-1&& !(RainbowCheekID_DELET(RainBowLexer_id_var,id_list)))
+    else if(*buf != '\0' && isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1)&&RainBowLexer_id_var!=-1)
         RainbowRetAdd(buf,RainBowLexer_id_var,&RainbowFrontLexer_Ret);
-    else if(*buf != '\0' && isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1)&&RainBowLexer_id_num!=-1&& !(RainbowCheekID_DELET(RainBowLexer_id_var,id_list)))
+    else if(*buf != '\0' && isdigit(*buf)&&(RainbowStatusCheekNumValidity(buf) != -1)&&RainBowLexer_id_num!=-1)
         RainbowRetAdd(buf,RainBowLexer_id_num,&RainbowFrontLexer_Ret);
     else//错误处理
     {

@@ -67,7 +67,9 @@ static const char help[] =
     "\t\t\tregSp [\"Sp_Word\"] [id/ignore] --This command will Register a Sp_Word wile [id/be ignored]\n"
     "\t\t\tLex [\"string\"] --This command will Lex the String by the rule you have Registered\n"
     "\t\t\tDel [id] --This command will Delete the id of rule\n"
-    "\t\t\tShow --This command will display all the rules on screen\n";
+    "\t\t\tShow --This command will display all the rules on screen\n"
+    "\t\t\tHelp --This command will display all the help info ont screen\n"
+    "\t\t\tQuit --This command end the Shell Mode Process\n";
 
 static const RainbowError repeatedErr = {"Repeated tokenRule","Repeated token ->"};
 static const RainbowError UndefineToken = {"Undefine token","UNdefine Token ->"};
@@ -80,6 +82,7 @@ static const RainbowError Invaild_token = {"we find a Invaild token in a wrong s
 static const RainbowError brace_notMatch = {"we not find the colse breace","Please cheek the block"};
 static const RainbowError countNotMatch = {"the id is less than the tokens count","Please cheek the id-block"};
 static const RainbowError endTokenNotMatch = {"need a \';\' at the statement's end","Please cheek the statement"};
+static const RainbowError UnKnownCommand = {"UnKnownCommandError:","Expect: \"regSw\"\n\"regSp\"\n\"Lex\"\n\"Show\"\n\"Del\"\n\n\"Quit\"\n\n\"Help\"\n"};
 #define RAINBOW_RAISE(ERROR) printf("ERROR:\n[%s]:%s\n",ERROR.errorMsg,ERROR.errorDoc);
 #define IGNORE_MIN (LONG_MAX-10000)
 #define IGNORE_MAX (LONG_MAX)
@@ -97,6 +100,15 @@ static int single_option;
 static rStatu* compStatu;
 static Rainbowqueue RainbowLexer_Ret = {NULL, 0, 0, 0};
 static Rainbowqueue RainbowFrontLexer_Ret = {NULL, 0, 0, 0};
+typedef struct __TokenList__
+{
+    RainbowToken Token;
+    char del_Label;
+}RainbowTokenList;
+static RainbowTokenList tokenList[1024] = {0};
+static RainbowTokenList tokenListSp[1024] = {0};
+static int TokenList_Count = 0;
+static int TokenListSp_Count = 0;
 #define WHITESPACE_SKIP(str) {while(*str==' ')str++;}
 #define STATULINE_INIT(statuLine,ch) {\
     statuLine->id = INIT_ID;\
@@ -163,7 +175,8 @@ RainbowLexerPrivate(char*) EscapeChar(const char* token)
     ret[index] = '\0';
     return ret;
 }
-
+RainbowLexerPrivate(void) tokenListAdd(char* token,long long id);
+RainbowLexerPrivate(void) tokenListSpAdd(char* token,long long id);
 RainbowLexerPrivate(rStatu*) StatuLineTable(int initCh) //从返回hash表中索引为initCh的状态链
 {
 
@@ -244,6 +257,7 @@ RainbowLexerPrivate(void) RainbowCreateStatusLine(const char* token,long long id
     if (!cheekStatusLine(*parser)) STATULINE_INIT(statuLine,*parser);
     if(*(parser+1)!='\0') RainbowStatuLineParse(&(statuLine->table),parser+1);
     else statuLine->id = RainBowLexer_id;
+    tokenListAdd(parser,id);
     free(parser);
 }
 RainbowLexerPrivate(void) RainbowStatusShowLine(rStatu* statu,size_t deep)
@@ -346,6 +360,7 @@ RainbowLexerPrivate(void) RainbowCreateStatusLineSp(const char* token,long long 
     if (!cheekStatusLineSp(*parser)) STATULINE_INIT(statuLine,*parser);
     if(*(parser+1)!='\0') RainbowStatuLineParseSp(&(statuLine->table),parser+1);
     else statuLine->id = RainBowLexer_id;
+    tokenListSpAdd(parser,id);
     free(parser);
 }
 RainbowLexerPrivate(void) RainbowStatusShowRuleSp()
@@ -860,7 +875,7 @@ RainbowLexerPrivate(int) RainbowLexerCopySrc(const char* src_path)
 {
     //将资源文件中的所有内容拷贝到编译文件中
     FILE* fp;
-    if( (fp=fopen(src_path,"rt")) == NULL)
+    if( (fp=fopen(src_path,"r")) == NULL)
     {
         RAINBOW_RAISE(SrcFileUnExist_Error);
         return -1;
@@ -946,6 +961,35 @@ int FrontCompileConfig()
 
 #define MAX_BUF_SIZE_OF_FRONT (2048)
 #define INVAILD_TOKEN_ERROR() {RAINBOW_RAISE(Invaild_token);printf("The Invaild token: %s\n",token->token);}
+RainbowLexerPrivate(void) tokenListAdd(char* token,long long id)
+{
+    int len = strlen(token);
+    tokenList[TokenList_Count].Token.token = (char*)malloc(len*sizeof(char)+1);
+    memset(tokenList[TokenList_Count].Token.token,'\0',len*sizeof(char)+1);
+    strcpy(tokenList[TokenList_Count].Token.token,token);
+    tokenList[TokenList_Count].Token.id = id;
+    TokenList_Count++;
+}
+RainbowLexerPrivate(void) tokenListSpAdd(char* token,long long id)
+{
+    int len = strlen(token);
+    tokenListSp[TokenListSp_Count].Token.token = (char*)malloc(len*sizeof(char)+1);
+    memset(tokenListSp[TokenListSp_Count].Token.token,'\0',len*sizeof(char)+1);
+    strcpy(tokenListSp[TokenListSp_Count].Token.token,token);
+    tokenListSp[TokenListSp_Count].Token.id = id;
+    TokenListSp_Count++;
+}
+RainbowLexerPrivate(void) DeleteToken(char* token,long long id)
+{
+    for (size_t i = 0; i < TokenList_Count; i++)
+    {
+        if(tokenList[i].Token.id == id && !strcmp(tokenList[i].Token.token,token))tokenList[i].del_Label = 1;
+    }
+    for (size_t i = 0; i < TokenList_Count; i++)
+    {
+        if(tokenListSp[i].Token.id == id && !strcmp(tokenListSp[i].Token.token,token))tokenListSp[i].del_Label = 1;
+    }
+}
 RainbowLexerPrivate(void) ID_INIT()
 {
     RainBowLexer_id_ignore = LONG_MAX -10000;
@@ -1316,10 +1360,102 @@ RainbowLexerPrivate(void) CompileFile(const char* file)
     RainbowLexerCompiler(filePath);
 }
 
+RainbowLexerPrivate(void) WipeStatuLine(rStatu* statuTable)
+{
+    if(statuTable == NULL || statuTable->table == NULL)return;
+    WipeStatuLine(statuTable->table);
+    WipeStatuLine(statuTable->Next);
+    free(statuTable);
+}
+RainbowLexerPrivate(void) WipeStatuTable()
+{
+    for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
+        if(cheekStatusLine(i))WipeStatuLine(StatuLineTable(i));
+}
+RainbowLexerPrivate(void) WipeStatuTableSp()
+{
+    for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
+        if(cheekStatusLineSp(i))WipeStatuLine(StatuLineTableSp(i));
+}
+RainbowLexerPrivate(void) ReCreateStatuTable(RainbowToken* tokenList,int count)
+{
+    for (size_t i = 0; i < count; i++)
+        RainbowCreateStatusLine((tokenList+i)->token,(tokenList+i)->id);
+}
+RainbowLexerPrivate(void) ReCreateStatuTableSp(RainbowToken* tokenList,int count)
+{
+    for (size_t i = 0; i < count; i++)
+        RainbowCreateStatusLineSp((tokenList+i)->token,(tokenList+i)->id);
+}
+RainbowLexerPrivate(void) command_regSw(char *command)
+{
+    char buf[MAX_BUF_SIZE_OF_FRONT] = {'\0'};
+    sscanf(command,"%[\".*\"]",buf);
+    if(buf[0] == '\0')
+    {
+        printf("The token need be (\")included");
+        return;
+    }
 
-RainbowLexerPrivate(void) Shell()
+}
+RainbowLexerPrivate(void) command_regSp(char *command)
 {
 
+}
+RainbowLexerPrivate(void) command_Del(char *command)
+{
+
+}
+RainbowLexerPrivate(void) command_Show(char *command)
+{
+    
+}
+RainbowLexerPrivate(void) command_Lex(char *command)
+{
+    
+}
+RainbowLexerPrivate(void) command_Help(char *command)
+{
+    
+}
+RainbowLexerPrivate(void) Shell()
+{
+    char command[MAX_BUF_SIZE_OF_FRONT] = {'\0'};
+    char commandHeader[50] = {'\0'};
+    while(scanf("%[^.*\n]",command))
+    {
+        //TODO : 手工写指令匹配
+        if(commandHeader[0] == '\0')
+        {
+            RAINBOW_RAISE(UnKnownCommand);
+        }
+        switch(commandHeader[0])
+        {
+            case 'r':
+                if(commandHeader[4] == 'w')command_regSw(command);
+                else if(commandHeader[4] == 'p')command_regSp(command);
+            break;
+            case 'D':
+                command_Del(command);
+            break;
+            case 'S':
+                command_Show(command);
+            break;
+            case 'L':
+                command_Lex(command);
+            break;
+            case 'H':
+                command_Help(command);
+            break;
+            case 'Q':
+            return;
+            break;
+        }
+        memset(commandHeader,'\0',50);
+        memset(command,'\0',MAX_BUF_SIZE_OF_FRONT);
+        printf("RainBowLexer:>");
+    }
+    return;
 }
 
 // int main(int argc, char const *argv[])
@@ -1360,18 +1496,19 @@ int main(int argc, char const *argv[])
                     return 0;
                     break;
                 }
-                // case 'D':
-                // case 'd':
-                // {
-                //     if(argc <=2)
-                //     {
-                //         Shell();
-                //         return 0;
-                //     }
-                //     ParseFile(argv[2]);
-                //     return 0;
-                //     break;
-                // }
+                case 'D':
+                case 'd':
+                {
+                    if(argc <=2)
+                    {
+                        Shell();
+                        return 0;
+                    }
+                    ParseFile(argv[2]);
+                    Shell();
+                    return 0;
+                    break;
+                }
                 default:
                 {
                     printf("Invaild Parameter %s",argv[1]);
