@@ -66,7 +66,7 @@ static const char help[] =
     "\t\t\tregSw [\"Sw_Word\"] [id/ignore] --This command will Register a Sw_Word with [id/be ignored]\n"
     "\t\t\tregSp [\"Sp_Word\"] [id/ignore] --This command will Register a Sp_Word wile [id/be ignored]\n"
     "\t\t\tLex [\"string\"] --This command will Lex the String by the rule you have Registered\n"
-    "\t\t\tDel [id] --This command will Delete the id of rule\n"
+    "\t\t\tDel [id/ignore] --This command will Delete the id of rule\n"
     "\t\t\tShow --This command will display all the rules on screen\n"
     "\t\t\tHelp --This command will display all the help info ont screen\n"
     "\t\t\tQuit --This command end the Shell Mode Process\n";
@@ -83,6 +83,8 @@ static const RainbowError brace_notMatch = {"we not find the colse breace","Plea
 static const RainbowError countNotMatch = {"the id is less than the tokens count","Please cheek the id-block"};
 static const RainbowError endTokenNotMatch = {"need a \';\' at the statement's end","Please cheek the statement"};
 static const RainbowError UnKnownCommand = {"UnKnownCommandError:","Expect: \"regSw\"\n\"regSp\"\n\"Lex\"\n\"Show\"\n\"Del\"\n\n\"Quit\"\n\n\"Help\"\n"};
+static const RainbowError ExpectedTokenDefine = {"Expected a token define","Expected a token after regSw/regSp"};
+static const RainbowError ExpectedIDefine = {"Expected a id define","Expected a id after tokenDEFINE"};
 #define RAINBOW_RAISE(ERROR) printf("ERROR:\n[%s]:%s\n",ERROR.errorMsg,ERROR.errorDoc);
 #define IGNORE_MIN (LONG_MAX-10000)
 #define IGNORE_MAX (LONG_MAX)
@@ -177,6 +179,8 @@ RainbowLexerPrivate(char*) EscapeChar(const char* token)
 }
 RainbowLexerPrivate(void) tokenListAdd(char* token,long long id);
 RainbowLexerPrivate(void) tokenListSpAdd(char* token,long long id);
+
+// StatuLine part
 RainbowLexerPrivate(rStatu*) StatuLineTable(int initCh) //从返回hash表中索引为initCh的状态链
 {
 
@@ -260,44 +264,6 @@ RainbowLexerPrivate(void) RainbowCreateStatusLine(const char* token,long long id
     tokenListAdd(parser,id);
     free(parser);
 }
-RainbowLexerPrivate(void) RainbowStatusShowLine(rStatu* statu,size_t deep)
-{
-    #define output(STATU,DEEP,CH) do{\
-        putchar('|');\
-        for (size_t i = 0; i < DEEP; i++) putchar(' ');\
-        putchar(' ');\
-        putchar('|');\
-        putchar('-');\
-        putchar(CH);\
-        putchar('\n');\
-        putchar('|');\
-        for (size_t i = 0; i < DEEP; i++) putchar(' ');\
-        putchar(' ');\
-        putchar(' ');\
-        putchar('|');\
-        putchar('\n');\
-    }while(0)
-    while(statu != NULL)
-    {
-        output(statu,deep,statu->initChar);
-        RainbowStatusShowLine(statu->table,deep+1);
-        if(statu->table == NULL || statu->id != INIT_ID )
-        {
-            putchar('|');
-            for (size_t i = 0; i < deep; i++) putchar(' ');
-            printf("(id:%ld)\n",statu->id);
-        }
-        statu = statu->Next;
-    }
-    return;
-}
-RainbowLexerPrivate(void) RainbowStatusShowRule()
-{
-    for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
-        if(cheekStatusLine(i))RainbowStatusShowLine(StatuLineTable(i),0);
-}
-
-
 /* sperator */
 RainbowLexerPrivate(rStatu*) StatuLineTableSp(int initCh) //从返回hash表中索引为initCh的状态链
 {
@@ -415,9 +381,7 @@ RainbowLexerPrivate(int) RainbowStatusCheekOfStaticWordValiditySp(const char* to
         token++;
     goto recursive_token;
 }
-/*
-    静态实体的状态机** [数字检验 , 变量名检验]
-*/
+
 
 RainbowLexerPrivate(int) GetStatusOfNum(char ch)
 {
@@ -553,9 +517,7 @@ RainbowLexerPrivate(char*) RainbowStatusCheekOfString(const char* token,char sin
     return string;
 }
 
-/*
-    从分隔文本
-*/
+// QueueManage part
 #define QUEUE_INIT_SIZE 512;
 RainbowLexerPrivate(void) RainbowQueueINIT(Rainbowqueue* Queue)
 {
@@ -616,6 +578,7 @@ RainbowLexerPrivate(void) RainbowQueueClear(Rainbowqueue* Queue)
     Queue->queue = (RainbowToken*)realloc(Queue->queue,Queue->size);
 }
 #define BUF_SIZE 1024
+//Lex part
 RainbowLexerPrivate(void) RainbowLex(const char* string)
 {
     /* 将string解析
@@ -943,22 +906,10 @@ int FrontCompileConfig()
     
     return 0;
 }
-// int mainForFront(int argc, char const *argv[])
-// {
-//         if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
-//         FrontCompileConfig();
-//         RainbowQueueINIT();
-//         double_option = 1;
-//         single_option = 1;
-//         RainbowLexerCompiler("RainbowLexerFront");
-//         printf("compiled");
-//     return 0;
-// }
-
 
 #include "RainbowLexerFront"
-//TODO : 完成解析文件和Shell操作
 
+// tokenList part
 #define MAX_BUF_SIZE_OF_FRONT (2048)
 #define INVAILD_TOKEN_ERROR() {RAINBOW_RAISE(Invaild_token);printf("The Invaild token: %s\n",token->token);}
 RainbowLexerPrivate(void) tokenListAdd(char* token,long long id)
@@ -990,6 +941,8 @@ RainbowLexerPrivate(void) DeleteToken(char* token,long long id)
         if(tokenListSp[i].Token.id == id && !strcmp(tokenListSp[i].Token.token,token))tokenListSp[i].del_Label = 1;
     }
 }
+
+// Parse part
 RainbowLexerPrivate(void) ID_INIT()
 {
     RainBowLexer_id_ignore = LONG_MAX -10000;
@@ -1157,7 +1110,7 @@ RainbowLexerPrivate(int) ParseUnion()
         long long *idSeries = ParseSeries();
         if(idSeries == NULL)return -1;
         long long iter = 0;
-        if(idSeries[0] == LLONG_MAX)
+        if(idSeries[0] == LLONG_MAX)//IGNORE
         {
             while(tokenlist[iter] != NULL)
             {
@@ -1360,6 +1313,8 @@ RainbowLexerPrivate(void) CompileFile(const char* file)
     RainbowLexerCompiler(filePath);
 }
 
+//shell part
+#include "commander.h"
 RainbowLexerPrivate(void) WipeStatuLine(rStatu* statuTable)
 {
     if(statuTable == NULL || statuTable->table == NULL)return;
@@ -1387,87 +1342,143 @@ RainbowLexerPrivate(void) ReCreateStatuTableSp(RainbowToken* tokenList,int count
     for (size_t i = 0; i < count; i++)
         RainbowCreateStatusLineSp((tokenList+i)->token,(tokenList+i)->id);
 }
-RainbowLexerPrivate(void) command_regSw(char *command)
+RainbowLexerPrivate(void) command_regSw()
 {
-    char buf[MAX_BUF_SIZE_OF_FRONT] = {'\0'};
-    sscanf(command,"%[\".*\"]",buf);
-    if(buf[0] == '\0')
+    RainbowCommandToken* token = RainbowCommanderNext();
+    if(token==NULL)
     {
-        printf("The token need be (\")included");
+        RAINBOW_RAISE(ExpectedTokenDefine);
         return;
     }
-
+    switch(token->id)
+    {
+        case 11:
+        {
+            RainbowCommandToken* idToken = RainbowCommanderNext();
+            if(idToken==NULL)
+            {
+                RAINBOW_RAISE(ExpectedIDefine);
+                return;
+            }
+            if(idToken->id == 12)tokenListAdd(token->token,atoll(idToken->token));
+            else
+            {
+                RAINBOW_RAISE(ExpectedIDefine);
+                return;
+            }
+            break;
+        }
+        default:
+            RAINBOW_RAISE(ExpectedTokenDefine);
+            return;
+        break;
+    }
 }
-RainbowLexerPrivate(void) command_regSp(char *command)
+RainbowLexerPrivate(void) command_regSp()
+{
+    RainbowCommandToken* token = RainbowCommanderNext();
+    if(token==NULL)
+    {
+        RAINBOW_RAISE(ExpectedTokenDefine);
+        return;
+    }
+    switch(token->id)
+    {
+        case 11:
+        {
+            RainbowCommandToken* idToken = RainbowCommanderNext();
+            if(idToken==NULL)
+            {
+                RAINBOW_RAISE(ExpectedIDefine);
+                return;
+            }
+            if(idToken->id == 12)tokenListSpAdd(token->token,atoll(idToken->token));
+            else
+            {
+                RAINBOW_RAISE(ExpectedIDefine);
+                return;
+            }
+            break;
+        }
+        default:
+            RAINBOW_RAISE(ExpectedTokenDefine);
+            return;
+        break;
+    }
+}
+RainbowLexerPrivate(void) command_Del()
 {
 
 }
-RainbowLexerPrivate(void) command_Del(char *command)
-{
-
-}
-RainbowLexerPrivate(void) command_Show(char *command)
+RainbowLexerPrivate(void) command_Show()
 {
     
 }
-RainbowLexerPrivate(void) command_Lex(char *command)
+RainbowLexerPrivate(void) command_Lex()
 {
     
 }
-RainbowLexerPrivate(void) command_Help(char *command)
+RainbowLexerPrivate(void) command_Help()
 {
     
 }
 RainbowLexerPrivate(void) Shell()
 {
     char command[MAX_BUF_SIZE_OF_FRONT] = {'\0'};
-    char commandHeader[50] = {'\0'};
+    printf("RainBowLexer:>");
     while(scanf("%[^.*\n]",command))
     {
-        //TODO : 手工写指令匹配
-        if(commandHeader[0] == '\0')
+        RainbowCommanderQueueClear();
+        RainbowCommanderLex(command);
+        RainbowCommandToken* token = RainbowCommanderNext();
+        if(token == NULL)
         {
             RAINBOW_RAISE(UnKnownCommand);
         }
-        switch(commandHeader[0])
+        switch(token->id)
         {
-            case 'r':
-                if(commandHeader[4] == 'w')command_regSw(command);
-                else if(commandHeader[4] == 'p')command_regSp(command);
+            case 1:
+                command_regSw();
             break;
-            case 'D':
-                command_Del(command);
+            case 2:
+                command_regSp();
             break;
-            case 'S':
-                command_Show(command);
+            case 3:
+                command_Lex();
             break;
-            case 'L':
-                command_Lex(command);
+            case 4:
+                command_Del();
             break;
-            case 'H':
-                command_Help(command);
+            case 5:
+                command_Show();
             break;
-            case 'Q':
-            return;
+            case 6:
+                command_Help();
+            break;
+            case 7:
+                return;
+            break;
+            default:
+                RAINBOW_RAISE(UnKnownCommand);
             break;
         }
-        memset(commandHeader,'\0',50);
+
         memset(command,'\0',MAX_BUF_SIZE_OF_FRONT);
         printf("RainBowLexer:>");
     }
     return;
 }
 
-// int main(int argc, char const *argv[])
-// {
-//     RainBowLexer_id_num = 30;
-//     RainBowLexer_id_var = 31;
-//     RainBowLexer_id_string = 32;
-//     if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
-//     CompileFile("test.RL");
-//     return 0;
-// }
 int main(int argc, char const *argv[])
+{
+    RainBowLexer_id_num = 30;
+    RainBowLexer_id_var = 31;
+    RainBowLexer_id_string = 32;
+    if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
+    CompileFile("commander.RL");
+    return 0;
+}
+/*int main(int argc, char const *argv[])
 {
     RainBowLexer_id_num = 30;
     RainBowLexer_id_var = 31;
@@ -1492,7 +1503,7 @@ int main(int argc, char const *argv[])
                         printf("There is no input file ^");
                         return 0;
                     }
-                    CompileFile(argv[2]);
+                    CompileFile("commander.RL");//CompileFile(argv[2]);
                     return 0;
                     break;
                 }
@@ -1521,3 +1532,4 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
+*/

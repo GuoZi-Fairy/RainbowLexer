@@ -602,13 +602,12 @@ void RainbowFrontLex(const char* string,long long* id_list)
     size_t index = 0;
     while(*strptr != '\0')
     {
-            if(*strptr == '\"'&&)//处理字符串
+            if(*strptr == '\"')//处理字符串
             {
                 if(*buf!='\0')
                 {
                     long long id = 0;
                     id = RainbowFrontStatusCheekOfStaticWordValidity(buf);
-                    if(RainbowCheekID_DELET(id,id_list))id = -1;
                     if(id >= 0) RainbowRetAdd(buf,id,&RainbowFrontLexer_Ret);
                     else if(isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1)&& (RainBowLexer_id_var!=-1))
                         RainbowRetAdd(buf,RainBowLexer_id_var,&RainbowFrontLexer_Ret);
@@ -636,7 +635,6 @@ void RainbowFrontLex(const char* string,long long* id_list)
             {   
                 int id = 0;
                 id = RainbowFrontStatusCheekOfStaticWordValidity(buf);
-                if(RainbowCheekID_DELET(id,id_list))id = -1;
                 if(id >= 0) RainbowRetAdd(buf,id,&RainbowFrontLexer_Ret);
                 else if(*buf != '\0' && isalpha(*buf)&&(RainbowStatusCheekVarNameValidity(buf) != -1)&&RainBowLexer_id_var!=-1)
                     RainbowRetAdd(buf,RainBowLexer_id_var,&RainbowFrontLexer_Ret);
