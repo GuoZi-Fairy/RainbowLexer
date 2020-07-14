@@ -1507,7 +1507,6 @@ RainbowLexerPrivate(void) Shell()
     {
         scanf("%[^.*\n]",command);
         getchar();  
-        printf("%s\n",command);
         RainbowCommanderQueueClear();
         RainbowCommanderLex(command);
         RainbowCommandToken* token = RainbowCommanderNext();
