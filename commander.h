@@ -1,7 +1,7 @@
  //DOUBLE OPTION
  //SINGLE OPTION
-#ifndef RAINBOWLEXER__h
 #define COMMANDER__H
+#define DOUBLE_STRING_OPTION
 #define IGNORE_MIN (LONG_MAX-10000)
 #define IGNORE_MAX (LONG_MAX)
 #ifdef _WIN32
@@ -11,8 +11,7 @@
 #define RainbowLexerPublic(type) extern type
 #define RainbowLexerPrivate(type) static type
 #endif
-#endif
-typedef struct __token__
+typedef struct __Commandtoken__
 {
 char* token;
 long long id;
