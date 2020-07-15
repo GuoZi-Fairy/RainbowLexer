@@ -1513,6 +1513,7 @@ RainbowLexerPrivate(void) Shell()
         if(token == NULL)
         {
             RAINBOW_RAISE(UnKnownCommand);
+            continue;
         }
         switch(token->id)
         {
@@ -1553,6 +1554,7 @@ int main(int argc, char const *argv[])
     RainBowLexer_id_var = 31;
     RainBowLexer_id_string = 32;
     if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
+    RainbowQueueINIT(&RainbowLexer_Ret);
     Shell();
     return 0;
 }
