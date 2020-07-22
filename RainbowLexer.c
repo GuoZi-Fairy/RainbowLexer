@@ -1416,10 +1416,49 @@ RainbowLexerPrivate(int) command_Del_similarity(const char* str1, const char* st
     //若认为二者相似则返回1
     //不相似则返回0
     //使用edit distance算法
+    static int ed_dp[200][200] = {0};
+
+    int len1 = strlen(str1 + 1);
+    int len2 = strlen(str1 + 1);
+    //init
+    for (int i = 1; i <= len1; i++)
+        for (int j = 1; j <= len2; j++)
+            ed_dp[i][j] = 0x9ffffff;
+
+    for (int i = 1; i <= len1; i++)
+        ed_dp[i][0] = i;
+
+    for (int j = 1; j <= len2; j++)
+        ed_dp[0][j] = j;
+
+    for (int i = 1; i <= len1; i++)
+    {
+        for (int j = 1; j <= len2; j++)
+        {
+            int flag;
+            if (str1[i] == str2[j])
+                flag = 0;
+            else
+                flag = 1;
+            ed_dp[i][j] = min(ed_dp[i - 1][j] + 1, min(ed_dp[i][j - 1] + 1, ed_dp[i - 1][j - 1] + flag));
+        }
+    }
+    return ed_dp[len1][len2];
 }
 RainbowLexerPrivate(void) command_Del()
 {
+    RainbowCommandToken* token = RainbowCommanderNext();
+    if(token==NULL)
+        return;
+        switch (token->id)
+        {
+            case 11: //string case 
 
+            break;
+            case 12://id case 
+                
+            break;
+        }
 }
 RainbowLexerPrivate(void) command_Show_Line1(int length,int ch) 
 {
@@ -1498,7 +1537,7 @@ RainbowLexerPrivate(void) command_Lex()
         return;
     switch (token->id)
     {
-        case 11:
+        case 11: //string
             if(modifyFlag)
             {
                 WipeStatuTable();
