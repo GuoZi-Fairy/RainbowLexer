@@ -108,6 +108,8 @@ typedef struct __TokenList__
     char del_Label;
 }RainbowTokenList;
 static RainbowTokenList tokenList[1024] = {0};
+static int modifyFlag = 0;
+static int modifySpFlag = 0;
 static RainbowTokenList tokenListSp[1024] = {0};
 static int TokenList_Count = 0;
 static int TokenListSp_Count = 0;
@@ -1320,12 +1322,12 @@ RainbowLexerPrivate(void) WipeStatuLine(rStatu* statuTable)
 RainbowLexerPrivate(void) WipeStatuTable()
 {
     for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
-        if(cheekStatusLine(i))WipeStatuLine(StatuLineTable(i));
+        if(cheekStatusLine(i))WipeStatuLine(StatuLineTable(i)->table);
 }
 RainbowLexerPrivate(void) WipeStatuTableSp()
 {
     for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
-        if(cheekStatusLineSp(i))WipeStatuLine(StatuLineTableSp(i));
+        if(cheekStatusLineSp(i))WipeStatuLine(StatuLineTableSp(i)->table);
 }
 RainbowLexerPrivate(void) ReCreateStatuTable(RainbowTokenList* tokenList,int count)
 {
@@ -1355,7 +1357,11 @@ RainbowLexerPrivate(void) command_regSw()
                 RAINBOW_RAISE(ExpectedIDefine);
                 return;
             }
-            if(idToken->id == 12)tokenListAdd(token->token,atoll(idToken->token));
+            if(idToken->id == 12)
+            {
+                tokenListAdd(token->token,atoll(idToken->token));
+                modifyFlag = 1;//标志已修改
+            }
             else
             {
                 RAINBOW_RAISE(ExpectedIDefine);
@@ -1387,7 +1393,11 @@ RainbowLexerPrivate(void) command_regSp()
                 RAINBOW_RAISE(ExpectedIDefine);
                 return;
             }
-            if(idToken->id == 12)tokenListSpAdd(token->token,atoll(idToken->token));
+            if(idToken->id == 12)
+            {
+                tokenListSpAdd(token->token,atoll(idToken->token));
+                modifySpFlag = 1;
+            }
             else
             {
                 RAINBOW_RAISE(ExpectedIDefine);
@@ -1400,6 +1410,12 @@ RainbowLexerPrivate(void) command_regSp()
             return;
         break;
     }
+}
+RainbowLexerPrivate(int) command_Del_similarity(const char* str1, const char* str2)
+{
+    //若认为二者相似则返回1
+    //不相似则返回0
+    //使用edit distance算法
 }
 RainbowLexerPrivate(void) command_Del()
 {
@@ -1426,7 +1442,10 @@ RainbowLexerPrivate(void) command_Show_Line2(int length,RainbowToken* token,int 
             putchar('\\');putchar('n');
             i++;
             break;
-        
+        case '\t':
+            putchar('\\');putchar('t');
+            i++;
+            break;
         default:
             putchar(token->token[i]);
             break;
@@ -1454,6 +1473,7 @@ RainbowLexerPrivate(void) command_Show()
 {
     command_Show_Line1(50,'=');
     printf("|%32s%16s|\n","StaticWordTable"," ");
+    command_Show_Line1(50,'=');
     for (size_t i = 0; i < TokenList_Count; i++)
     {
         if(!tokenList[i].del_Label)command_Show_Line2(50,&(tokenList[i].Token),23);
@@ -1462,6 +1482,7 @@ RainbowLexerPrivate(void) command_Show()
     putchar('\n');
     command_Show_Line1(50,'=');
     printf("|%32s%16s|\n","SperatorWordTable"," ");
+    command_Show_Line1(50,'=');
     for (size_t i = 0; i < TokenListSp_Count; i++)
     {
         if(!tokenListSp[i].del_Label)command_Show_Line2(50,&(tokenListSp[i].Token),23);
@@ -1473,13 +1494,23 @@ RainbowLexerPrivate(void) command_Show()
 RainbowLexerPrivate(void) command_Lex()
 {
     RainbowCommandToken* token = RainbowCommanderNext();
+    if(token==NULL)
+        return;
     switch (token->id)
     {
         case 11:
-            WipeStatuTable();
-            WipeStatuTableSp();
-            ReCreateStatuTable(tokenList,TokenList_Count);
-            ReCreateStatuTableSp(tokenListSp,TokenListSp_Count);
+            if(modifyFlag)
+            {
+                WipeStatuTable();
+                ReCreateStatuTable(tokenList,TokenList_Count);
+                modifyFlag = 0;
+            }
+            if(modifySpFlag)
+            {       
+                WipeStatuTableSp();
+                ReCreateStatuTableSp(tokenListSp,TokenListSp_Count);
+                modifySpFlag = 0;
+            }
             RainbowLex(token->token);
             RainbowToken* resToken;
             while(( resToken = RainbowNext(&RainbowLexer_Ret)) != NULL)
@@ -1548,6 +1579,17 @@ RainbowLexerPrivate(void) Shell()
     return;
 }
 
+// int main(int argc, char const *argv[])
+// {
+//     RainBowLexer_id_num = 30;
+//     RainBowLexer_id_var = 31;
+//     RainBowLexer_id_string = 32;
+//     if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
+//     RainbowQueueINIT(&RainbowLexer_Ret);
+//     ParseFile("demo.RL");
+//     Shell();
+//     return 0;
+// }
 int main(int argc, char const *argv[])
 {
     RainBowLexer_id_num = 30;
@@ -1555,15 +1597,6 @@ int main(int argc, char const *argv[])
     RainBowLexer_id_string = 32;
     if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
     RainbowQueueINIT(&RainbowLexer_Ret);
-    Shell();
-    return 0;
-}
-/*int main(int argc, char const *argv[])
-{
-    RainBowLexer_id_num = 30;
-    RainBowLexer_id_var = 31;
-    RainBowLexer_id_string = 32;
-    if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
     if(argc == 1)//无参数时输出help菜单
     {
         printf("%s",help);
@@ -1612,4 +1645,3 @@ int main(int argc, char const *argv[])
     }
     return 0;
 }
-*/

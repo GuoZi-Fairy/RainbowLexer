@@ -2,5 +2,6 @@
     "files.associations": {
         "*.bin": "plaintext",
         "rainbowlexerfront": "c"
-    }
+    },
+    "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools"
 }
