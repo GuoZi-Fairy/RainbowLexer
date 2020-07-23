@@ -163,6 +163,23 @@ RainbowLexerPrivate(int) RainbowStatusCheekVarNameValidity(const char *token)
     }
     return status;
 }
+RainbowLexerPrivate(int) ISescapeChar(char ch)
+{
+    switch (ch)
+    {
+    case '\\':
+    case 't':
+    case 'b':
+    case 'n':
+    case '\"':
+    case '\'':
+        return 1;
+        break;
+    default:
+        return 0;
+        break;
+    }
+}
 RainbowLexerPrivate(char *) RainbowStatusCheekOfString(const char *token, char singleORdouble)
 {
     const char *ptr = token;
@@ -174,7 +191,7 @@ RainbowLexerPrivate(char *) RainbowStatusCheekOfString(const char *token, char s
             RAINBOW_RAISE(StringError);
             return NULL;
         }
-        else if (ptr[len] == '\\' && ptr[len + 1] == singleORdouble)
+        else if (ptr[len] == '\\' && ISescapeChar(ptr[len + 1]))
             len += 1;
         len++;
     }
@@ -216,9 +233,9 @@ RainbowLexerPublic(void) RainbowCommanderLex(const char *string)
                         id = RainbowStatusCheekOfStaticWordValidity(buf);
                         if (id >= 0)
                             RainbowRetAdd(buf, id);
-                        else if (isalpha(*buf) && (RainbowStatusCheekVarNameValidity(buf) != -1))
+                        else if (isalpha(*buf) && (ID_VAR != -1) && (RainbowStatusCheekVarNameValidity(buf) != -1))
                             RainbowRetAdd(buf, RainBowLexer_id_var);
-                        else if (isdigit(*buf) && (RainbowStatusCheekNumValidity(buf) != -1))
+                        else if (isdigit(*buf) && (ID_NUM != -1) && (RainbowStatusCheekNumValidity(buf) != -1))
                             RainbowRetAdd(buf, RainBowLexer_id_num);
                         else //错误处理
                         {
@@ -255,9 +272,9 @@ RainbowLexerPublic(void) RainbowCommanderLex(const char *string)
             if (id >= 0)
                 RainbowRetAdd(buf, id);
 
-            else if (isalpha(*buf) && (RainbowStatusCheekVarNameValidity(buf) != -1) && (ID_VAR != -1))
+            else if (isalpha(*buf)  && (ID_VAR != -1) && (RainbowStatusCheekVarNameValidity(buf) != -1))
                 RainbowRetAdd(buf, ID_VAR);
-            else if (isdigit(*buf) && (RainbowStatusCheekNumValidity(buf) != -1) && (ID_NUM != -1))
+            else if (isdigit(*buf)  && (ID_NUM != -1) && (RainbowStatusCheekNumValidity(buf) != -1))
                 RainbowRetAdd(buf, ID_NUM);
             else if (*buf == '\0')
                 goto BUF_EMPTY_CASE_; //用于处理多个连续分隔符的情况
@@ -289,15 +306,14 @@ RainbowLexerPublic(void) RainbowCommanderLex(const char *string)
     id = RainbowStatusCheekOfStaticWordValidity(buf);
     if (id >= 0)
         RainbowRetAdd(buf, id);
-    else if (isalpha(*buf) && (RainbowStatusCheekVarNameValidity(buf) != -1) && (ID_VAR != -1))
+    else if (isalpha(*buf) && (ID_VAR != -1) && (RainbowStatusCheekVarNameValidity(buf) != -1))
         RainbowRetAdd(buf, ID_VAR);
-    else if (isdigit(*buf) && (RainbowStatusCheekNumValidity(buf) != -1) && (ID_NUM != -1))
+    else if (isdigit(*buf) && (ID_NUM != -1) && (RainbowStatusCheekNumValidity(buf) != -1))
         RainbowRetAdd(buf, ID_NUM);
     else //错误处理
     {
         RAINBOW_RAISE(UndefineToken);
         printf("%s\n", buf);
-        getchar();
         putchar('\n');
     }
 }

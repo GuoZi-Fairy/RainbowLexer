@@ -1445,6 +1445,7 @@ RainbowLexerPrivate(int) command_Del_similarity(const char* str1, const char* st
     }
     return ed_dp[len1][len2];
 }
+
 RainbowLexerPrivate(void) command_Del()
 {
     RainbowCommandToken* token = RainbowCommanderNext();
@@ -1572,11 +1573,11 @@ RainbowLexerPrivate(void) command_Help()
 RainbowLexerPrivate(void) Shell()
 {
     char command[MAX_BUF_SIZE_OF_FRONT] = {'\0'};
-    printf("RainBowLexer:>");
     while(1)
     {
-        scanf("%[^.*\n]",command);
-        getchar();  
+        memset(command,'\0',MAX_BUF_SIZE_OF_FRONT);
+        printf("RainBowLexer:>");
+        gets(command);
         RainbowCommanderQueueClear();
         RainbowCommanderLex(command);
         RainbowCommandToken* token = RainbowCommanderNext();
@@ -1612,8 +1613,6 @@ RainbowLexerPrivate(void) Shell()
                 RAINBOW_RAISE(UnKnownCommand);
             break;
         }
-        memset(command,'\0',MAX_BUF_SIZE_OF_FRONT);
-        printf("RainBowLexer:>");
     }
     return;
 }
@@ -1641,6 +1640,8 @@ int main(int argc, char const *argv[])
         printf("%s",help);
         return 0;
     }
+    Shell();
+    /*
     switch (argv[1][0])
     {
         case '-':
@@ -1682,5 +1683,6 @@ int main(int argc, char const *argv[])
             break;
         }
     }
+    */
     return 0;
 }
