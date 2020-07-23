@@ -88,13 +88,14 @@ static const RainbowError ExpectedIDefine = {"Expected a id define","Expected a 
 #define RAINBOW_RAISE(ERROR) printf("ERROR:\n[%s]:%s\n",ERROR.errorMsg,ERROR.errorDoc);
 #define IGNORE_MIN (LONG_MAX-10000)
 #define IGNORE_MAX (LONG_MAX)
+//ignore 字符id范围
+
 static long long RainBowLexer_id;
 static long long RainBowLexer_id_num = 30;
 static long long RainBowLexer_id_var = 31;
 static long long RainBowLexer_id_string = 32;
 static long long RainBowLexer_id_ignore = IGNORE_MIN;
 #define RB_ignore (RainBowLexer_id_ignore++)
-//ignore的id范围为[25526,35526]
 
 static  const char* TokenRule_Now;
 static int double_option;
@@ -1454,8 +1455,14 @@ RainbowLexerPrivate(void) command_Del()
         switch (token->id)
         {
             case 11: //string case 
-
+            {
+                for (size_t i = 0; i < TokenList_Count; i++)
+                {
+                    
+                }
+                
             break;
+            }
             case 12://id case 
                 
             break;
