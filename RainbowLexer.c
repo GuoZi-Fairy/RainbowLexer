@@ -1417,7 +1417,8 @@ RainbowLexerPrivate(int) command_Del_similarity(const char* str1, const char* st
     //若认为二者相似则返回1
     //不相似则返回0
     //使用edit distance算法
-    static int ed_dp[200][200] = {0};
+    #define DP_MEMORY_SIZE 200
+    static int ed_dp[DP_MEMORY_SIZE][DP_MEMORY_SIZE] = {0};//预估尺寸
 
     int len1 = strlen(str1 + 1);
     int len2 = strlen(str1 + 1);
@@ -1450,23 +1451,104 @@ RainbowLexerPrivate(int) command_Del_similarity(const char* str1, const char* st
 RainbowLexerPrivate(void) command_Del()
 {
     RainbowCommandToken* token = RainbowCommanderNext();
-    if(token==NULL)
-        return;
-        switch (token->id)
+    RainbowTokenList* similarToken[50] = {NULL};
+    int similarToken_Count = 0;
+    RainbowTokenList* equalToken[50] = {NULL};
+    int equalToken_Count = 0;
+    if(token==NULL) return;
+    switch (token->id)
+    {
+        case 11: //string case 
         {
-            case 11: //string case 
+            for (size_t i = 0; i < TokenList_Count; i++)
             {
-                for (size_t i = 0; i < TokenList_Count; i++)
-                {
-                    
-                }
-                
-            break;
+                if (tokenList[i].del_Label)continue;
+                int similartity = command_Del_similarity(token->token,tokenList[i].Token.token);
+                if(similartity == 0)
+                    equalToken[equalToken_Count++] = &tokenList[i];
+                else if(similartity <=2 && similartity < strlen(token->token) && similartity > 0)
+                    similarToken[similarToken_Count++] = &tokenList[i];
+                else
+                    continue;
             }
-            case 12://id case 
-                
-            break;
+            for (size_t i = 0; i < TokenListSp_Count; i++)
+            {
+                if (tokenList[i].del_Label)continue;
+                int similartity = command_Del_similarity(token->token,tokenListSp[i].Token.token);
+                if(similartity == 0)
+                    equalToken[equalToken_Count++] = &tokenListSp[i];
+                else if(similartity <=2 && similartity < strlen(token->token) && similartity > 0)
+                    similarToken[similarToken_Count++] = &tokenListSp[i];
+                else
+                    continue;
+            }
+            if(equalToken_Count != 0)
+            {
+                if(equalToken_Count==1)equalToken[0]->del_Label = 1;
+                else
+                {
+                    printf("There are more than one choice could be delete,you could choose\n");
+                    printf("[-2]{ALL(全选删除)}\t[-1]{QUIT(不删除)}\n");
+                    for (size_t i = 0; i < equalToken_Count; i++)
+                    {
+                        printf("[%ld]{\"%s\"--%ld}\t",i,equalToken[i]->Token.token,equalToken[i]->Token.id);
+                    }
+                    printf("\nrainbowLexer[Please input a choice]>");
+                    int choice = -3;
+                    scanf("%d",&choice);
+                    switch (choice)
+                    {
+                    case -1:
+                        return;
+                        break;
+                    case -2:
+                        for (size_t i = 0; i < equalToken_Count; i++)equalToken[i]->del_Label = 1;
+                        break;
+                    case -3:
+                        printf("\nERROR:INVALID INPUT\n");
+                        return;
+                        break;
+                    default:
+                        equalToken[choice]->del_Label = 1;
+                        return;
+                        break;
+                    }
+                }
+            }
+            else if(similarToken_Count != 0)
+            {
+                printf("There is no [%s] could be delete,but there are some similar could be choice\n",token->token);
+                printf("[-2]{ALL(全选删除)}\t[-1]{QUIT(不删除)}\n");
+                for (size_t i = 0; i < similarToken_Count; i++)
+                {
+                    printf("[%ld]{\"%s\"--%ld}\t",i,similarToken[i]->Token.token,similarToken[i]->Token.id);
+                }
+                printf("\nrainbowLexer[Please input a choice]>");
+                int choice = -3;
+                scanf("%d",&choice);
+                switch (choice)
+                {
+                case -1:
+                    return;
+                    break;
+                case -2:
+                    for (size_t i = 0; i < equalToken_Count; i++)equalToken[i]->del_Label = 1;
+                    break;
+                case -3:
+                    printf("\nERROR:INVALID INPUT\n");
+                    return;
+                    break;
+                default:
+                    similarToken[choice]->del_Label = 1;
+                    return;
+                    break;
+                }
+            }
         }
+        case 12: //id case 
+            return;
+        break;
+    }
 }
 RainbowLexerPrivate(void) command_Show_Line1(int length,int ch) 
 {
@@ -1637,6 +1719,7 @@ RainbowLexerPrivate(void) Shell()
 // }
 int main(int argc, char const *argv[])
 {
+    SetConsoleOutputCP(65001);
     RainBowLexer_id_num = 30;
     RainBowLexer_id_var = 31;
     RainBowLexer_id_string = 32;
@@ -1647,8 +1730,6 @@ int main(int argc, char const *argv[])
         printf("%s",help);
         return 0;
     }
-    Shell();
-    /*
     switch (argv[1][0])
     {
         case '-':
@@ -1690,6 +1771,5 @@ int main(int argc, char const *argv[])
             break;
         }
     }
-    */
     return 0;
 }

@@ -9,7 +9,8 @@
             "program": "${fileDirname}/${fileBasenameNoExtension}.exe",
             "args": [
                 "commander.c",
-                "-d"
+                "-d",
+                "demo.RL"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
