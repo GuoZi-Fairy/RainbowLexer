@@ -1439,6 +1439,7 @@ RainbowLexerPrivate(int) command_Del_similarity(const char* str1, const char* st
     //若认为二者相似则返回1
     //不相似则返回0
     //使用edit distance算法
+    #define min(a, b) (((a) < (b)) ? (a) : (b))
     #define DP_MEMORY_SIZE 200
     static int ed_dp[DP_MEMORY_SIZE][DP_MEMORY_SIZE] = {0};//预估尺寸
 
@@ -1762,7 +1763,9 @@ RainbowLexerPrivate(void) Shell()
 
 int main(int argc, char const *argv[])
 {
+    #ifdef _WIN32
     SetConsoleOutputCP(65001);
+    #endif
     RainBowLexer_id_num = 30;
     RainBowLexer_id_var = 31;
     RainBowLexer_id_string = 32;
