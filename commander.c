@@ -342,6 +342,45 @@ RainbowLexerPrivate(long long) RainbowStatusCheekOfStaticWordValidity(const char
 {
     switch (*token++)
     {
+    case 'C':
+    {
+        switch (*token++)
+        {
+            case 'o':
+            {
+                switch (*token++)
+                {
+                    case 'm':
+                    {
+                        switch (*token++)
+                        {
+                            case 'p':
+                            {
+                                switch (*token++)
+                                {
+                                    case 'i':
+                                    {
+                                        switch (*token++)
+                                        case 'l':
+                                        {
+                                            switch (*token++)
+                                            {
+                                                case 'e':
+                                                {
+                                                    if (*token == '\0')
+                                                    return 8;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     case 'D':
     {
         switch (*token++)

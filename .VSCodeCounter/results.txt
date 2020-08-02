@@ -1,21 +1,21 @@
-Date : 2020-07-11 19:51:33
+Date : 2020-08-02 22:47:10
 Directory : d:\projects\RainbowLexer
-Total : 7 files,  1922 codes, 88 comments, 58 blanks, all 2068 lines
+Total : 9 files,  2880 codes, 101 comments, 77 blanks, all 3058 lines
 
 Languages
 +----------+------------+------------+------------+------------+------------+
 | language | files      | code       | comment    | blank      | total      |
 +----------+------------+------------+------------+------------+------------+
-| C        |          3 |      1,788 |         86 |         49 |      1,923 |
+| C        |          4 |      2,724 |         97 |         67 |      2,888 |
 | Markdown |          1 |         91 |          0 |          8 |         99 |
-| C++      |          3 |         43 |          2 |          1 |         46 |
+| C++      |          4 |         65 |          4 |          2 |         71 |
 +----------+------------+------------+------------+------------+------------+
 
 Directories
 +----------------------------------------------+------------+------------+------------+------------+------------+
 | path                                         | files      | code       | comment    | blank      | total      |
 +----------------------------------------------+------------+------------+------------+------------+------------+
-| .                                            |          7 |      1,922 |         88 |         58 |      2,068 |
+| .                                            |          9 |      2,880 |        101 |         77 |      3,058 |
 +----------------------------------------------+------------+------------+------------+------------+------------+
 
 Files
@@ -23,11 +23,13 @@ Files
 | filename                                     | language | code       | comment    | blank      | total      |
 +----------------------------------------------+----------+------------+------------+------------+------------+
 | d:\projects\RainbowLexer\README.md           | Markdown |         91 |          0 |          8 |         99 |
-| d:\projects\RainbowLexer\RainbowLexer.c      | C        |      1,412 |         80 |         38 |      1,530 |
+| d:\projects\RainbowLexer\RainbowLexer.c      | C        |      1,663 |         73 |         41 |      1,777 |
 | d:\projects\RainbowLexer\RainbowLexer.h      | C++      |         10 |          0 |          0 |         10 |
 | d:\projects\RainbowLexer\RainbowLexerFront.h | C++      |         11 |          0 |          0 |         11 |
+| d:\projects\RainbowLexer\commander.c         | C        |        616 |          8 |         10 |        634 |
+| d:\projects\RainbowLexer\commander.h         | C++      |         22 |          2 |          1 |         25 |
 | d:\projects\RainbowLexer\demo.c              | C        |        368 |          6 |         10 |        384 |
 | d:\projects\RainbowLexer\demo.h              | C++      |         22 |          2 |          1 |         25 |
-| d:\projects\RainbowLexer\test.c              | C        |          8 |          0 |          1 |          9 |
-| Total                                        |          |      1,922 |         88 |         58 |      2,068 |
+| d:\projects\RainbowLexer\test.c              | C        |         77 |         10 |          6 |         93 |
+| Total                                        |          |      2,880 |        101 |         77 |      3,058 |
 +----------------------------------------------+----------+------------+------------+------------+------------+

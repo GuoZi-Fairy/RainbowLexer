@@ -69,6 +69,7 @@ static const char help[] =
     "\t\t\tDel [id/ignore] --This command will Delete the id of rule\n"
     "\t\t\tShow --This command will display all the rules on screen\n"
     "\t\t\tHelp --This command will display all the help info ont screen\n"
+    "\t\t\tCompile [FileName] --This command will compile the ruleList to CFile\n"
     "\t\t\tQuit --This command end the Shell Mode Process\n";
 
 static const RainbowError repeatedErr = {"Repeated tokenRule","Repeated token ->"};
@@ -1307,7 +1308,6 @@ RainbowLexerPrivate(void) CompileFile(const char* file)
             filePath[len-i] = '\0';
     }
     ParseFile(file);
-    
     RainbowLexerCompiler(filePath);
 }
 
@@ -1323,22 +1323,44 @@ RainbowLexerPrivate(void) WipeStatuLine(rStatu* statuTable)
 RainbowLexerPrivate(void) WipeStatuTable()
 {
     for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
-        if(cheekStatusLine(i))WipeStatuLine(StatuLineTable(i)->table);
+    {
+        if(cheekStatusLine(i))
+        {
+            WipeStatuLine(StatuLineTable(i)->table);
+            StatuLineTable(i)->table = (rStatu*)malloc(sizeof(rStatu));
+            STATULINE_INIT(StatuLineTable(i)->table,'\0');
+        }
+    }
 }
 RainbowLexerPrivate(void) WipeStatuTableSp()
 {
     for (size_t i = 0; i < HASH_TABLE_SIZE; i++)
-        if(cheekStatusLineSp(i))WipeStatuLine(StatuLineTableSp(i)->table);
+    {
+        if(cheekStatusLineSp(i))
+        {
+            WipeStatuLine(StatuLineTableSp(i)->table);
+            StatuLineTableSp(i)->table = (rStatu*)malloc(sizeof(rStatu));
+            STATULINE_INIT(StatuLineTableSp(i)->table,'\0');
+        }
+    }
 }
 RainbowLexerPrivate(void) ReCreateStatuTable(RainbowTokenList* tokenList,int count)
 {
     for (size_t i = 0; i < count; i++)
-        if(!tokenList[i].del_Label)RainbowCreateStatusLine((tokenList+i)->Token.token,(tokenList+i)->Token.id);
+        if(!tokenList[i].del_Label)
+        {
+            tokenList[i].del_Label = 1;
+            RainbowCreateStatusLine((tokenList+i)->Token.token,(tokenList+i)->Token.id);
+        }
 }
 RainbowLexerPrivate(void) ReCreateStatuTableSp(RainbowTokenList* tokenList,int count)
 {
     for (size_t i = 0; i < count; i++)
-        if(!tokenList[i].del_Label)RainbowCreateStatusLineSp((tokenList+i)->Token.token,(tokenList+i)->Token.id);
+        if(!tokenList[i].del_Label)
+        {
+            tokenList[i].del_Label = 1;
+            RainbowCreateStatusLineSp((tokenList+i)->Token.token,(tokenList+i)->Token.id);
+        }
 }
 RainbowLexerPrivate(void) command_regSw()
 {
@@ -1445,9 +1467,8 @@ RainbowLexerPrivate(int) command_Del_similarity(const char* str1, const char* st
             ed_dp[i][j] = min(ed_dp[i - 1][j] + 1, min(ed_dp[i][j - 1] + 1, ed_dp[i - 1][j - 1] + flag));
         }
     }
-    return ed_dp[len1][len2];
+    return (ed_dp[len1][len2]);
 }
-
 RainbowLexerPrivate(void) command_Del()
 {
     RainbowCommandToken* token = RainbowCommanderNext();
@@ -1466,7 +1487,7 @@ RainbowLexerPrivate(void) command_Del()
                 int similartity = command_Del_similarity(token->token,tokenList[i].Token.token);
                 if(similartity == 0)
                     equalToken[equalToken_Count++] = &tokenList[i];
-                else if(similartity <=2 && similartity < strlen(token->token) && similartity > 0)
+                else if(similartity <=1 && similartity < strlen(token->token) && similartity > 0)
                     similarToken[similarToken_Count++] = &tokenList[i];
                 else
                     continue;
@@ -1477,7 +1498,7 @@ RainbowLexerPrivate(void) command_Del()
                 int similartity = command_Del_similarity(token->token,tokenListSp[i].Token.token);
                 if(similartity == 0)
                     equalToken[equalToken_Count++] = &tokenListSp[i];
-                else if(similartity <=2 && similartity < strlen(token->token) && similartity > 0)
+                else if(similartity <=1 && similartity < strlen(token->token) && similartity > 0)
                     similarToken[similarToken_Count++] = &tokenListSp[i];
                 else
                     continue;
@@ -1544,11 +1565,25 @@ RainbowLexerPrivate(void) command_Del()
                     break;
                 }
             }
+            break;
         }
         case 12: //id case 
-            return;
-        break;
+        {
+            long long _id_ = atoll(token->token);
+            for (size_t i = 0; i < TokenList_Count; i++)
+            {
+                if(tokenList[i].del_Label)continue;
+                if(tokenList[i].Token.id == _id_)tokenList[i].del_Label = 1;
+            }
+            for (size_t i = 0; i < TokenListSp_Count; i++)
+            {
+                if(tokenListSp[i].del_Label)continue;
+                if(tokenListSp[i].Token.id == _id_)tokenListSp[i].del_Label = 1;
+            }
+            break;
+        }
     }
+    return;
 }
 RainbowLexerPrivate(void) command_Show_Line1(int length,int ch) 
 {
@@ -1659,6 +1694,21 @@ RainbowLexerPrivate(void) command_Help()
     printf("%s",help);
     return;
 }
+RainbowLexerPrivate(void) command_Compile()
+{
+    WipeStatuTable();
+    ReCreateStatuTable(tokenList,TokenList_Count);
+    WipeStatuTableSp();
+    ReCreateStatuTableSp(tokenListSp,TokenListSp_Count);
+    RainbowCommandToken* token = RainbowCommanderNext();
+    if(token != NULL)
+    {
+        if(token->id == 11)RainbowLexerCompiler(token->token);
+    }
+    else
+        RainbowLexerCompiler("RainbowLexerDefaultOutputFile.c");
+    return;
+}
 RainbowLexerPrivate(void) Shell()
 {
     char command[MAX_BUF_SIZE_OF_FRONT] = {'\0'};
@@ -1698,6 +1748,10 @@ RainbowLexerPrivate(void) Shell()
             case 7:
                 return;
             break;
+            case 8:
+                command_Compile();
+                return;
+            break;
             default:
                 RAINBOW_RAISE(UnKnownCommand);
             break;
@@ -1706,17 +1760,6 @@ RainbowLexerPrivate(void) Shell()
     return;
 }
 
-// int main(int argc, char const *argv[])
-// {
-//     RainBowLexer_id_num = 30;
-//     RainBowLexer_id_var = 31;
-//     RainBowLexer_id_string = 32;
-//     if(compStatu == NULL)compStatu = StatuLineTable(HASH_TABLE_SIZE);
-//     RainbowQueueINIT(&RainbowLexer_Ret);
-//     ParseFile("demo.RL");
-//     Shell();
-//     return 0;
-// }
 int main(int argc, char const *argv[])
 {
     SetConsoleOutputCP(65001);
@@ -1744,7 +1787,7 @@ int main(int argc, char const *argv[])
                         printf("There is no input file ^");
                         return 0;
                     }
-                    CompileFile("commander.RL");//CompileFile(argv[2]);
+                    CompileFile(argv[2]);
                     return 0;
                     break;
                 }
