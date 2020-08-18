@@ -871,41 +871,6 @@ RainbowLexerPrivate(int) RainbowLexerCompiler(const char* file_path) //总编译
     freopen("/dev/console","w",stdout);
     #endif
 }
-
-
-int FrontCompileConfig()
-{
-    RainBowLexer_id_num = 30;
-    RainBowLexer_id_var = 31;
-    //ignore的id范围为[25526,35526]
-    RainBowLexer_id_string = 32;
-    #ifdef _WIN32
-    SetConsoleOutputCP(65001);
-    #endif
-    RainbowCreateStatusLine("staticWord",1);
-    RainbowCreateStatusLine("sw",1);
-    RainbowCreateStatusLine("sperator",2);
-    RainbowCreateStatusLine("sp",2);
-    RainbowCreateStatusLine("IGNORE",3);
-    RainbowCreateStatusLine("__VAR__",11);
-    RainbowCreateStatusLine("STRING_SINGLE",12);
-    RainbowCreateStatusLine("STRING_DOUBLE",13);
-    RainbowCreateStatusLine("NUMBER",14);
-    RainbowCreateStatusLineSp("{",15);
-    RainbowCreateStatusLineSp("}",16);
-    RainbowCreateStatusLineSp("[",17);
-    RainbowCreateStatusLineSp("]",18);
-    RainbowCreateStatusLineSp("-",19);
-    RainbowCreateStatusLineSp(",",20);
-    RainbowCreateStatusLineSp(":",21);
-    RainbowCreateStatusLineSp(";",22);
-    RainbowCreateStatusLineSp(" ",RB_ignore);
-    RainbowCreateStatusLineSp("\n",RB_ignore);
-    RainbowCreateStatusLineSp("\t",RB_ignore);
-    
-    return 0;
-}
-
 #include "RainbowLexerFront"
 
 // tokenList part
