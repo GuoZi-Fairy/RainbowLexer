@@ -8,8 +8,7 @@
             "request": "launch",
             "program": "${fileDirname}/${fileBasenameNoExtension}.exe",
             "args": [
-                "-d",
-                "demo.RL"
+                "-d"
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

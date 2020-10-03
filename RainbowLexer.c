@@ -1309,22 +1309,22 @@ RainbowLexerPrivate(void) WipeStatuTableSp()
         }
     }
 }
-RainbowLexerPrivate(void) ReCreateStatuTable(RainbowTokenList* tokenList,int count)
+RainbowLexerPrivate(void) ReCreateStatuTable(RainbowTokenList* _tokenList_,int count)
 {
     for (size_t i = 0; i < count; i++)
-        if(!tokenList[i].del_Label)
+        if(!_tokenList_[i].del_Label)
         {
-            tokenList[i].del_Label = 1;
-            RainbowCreateStatusLine((tokenList+i)->Token.token,(tokenList+i)->Token.id);
+            _tokenList_[i].del_Label = 1;
+            RainbowCreateStatusLine((_tokenList_+i)->Token.token,(_tokenList_+i)->Token.id);
         }
 }
-RainbowLexerPrivate(void) ReCreateStatuTableSp(RainbowTokenList* tokenList,int count)
+RainbowLexerPrivate(void) ReCreateStatuTableSp(RainbowTokenList* _tokenList_,int count)
 {
     for (size_t i = 0; i < count; i++)
-        if(!tokenList[i].del_Label)
+        if(!_tokenList_[i].del_Label)
         {
-            tokenList[i].del_Label = 1;
-            RainbowCreateStatusLineSp((tokenList+i)->Token.token,(tokenList+i)->Token.id);
+            _tokenList_[i].del_Label = 1;
+            RainbowCreateStatusLineSp((_tokenList_+i)->Token.token,(_tokenList_+i)->Token.id);
         }
 }
 RainbowLexerPrivate(void) command_regSw()
@@ -1335,9 +1335,9 @@ RainbowLexerPrivate(void) command_regSw()
         RAINBOW_RAISE(ExpectedTokenDefine);
         return;
     }
-    switch(token->id) //string
+    switch(token->id) 
     {
-        case 11:
+        case 11://string
         {
             RainbowCommandToken* idToken = RainbowCommanderNext();
             if(idToken==NULL)
@@ -1345,15 +1345,20 @@ RainbowLexerPrivate(void) command_regSw()
                 RAINBOW_RAISE(ExpectedIDefine);
                 return;
             }
-            if(idToken->id == 12)
+            switch (idToken->id)
             {
-                tokenListAdd(token->token,atoll(idToken->token));
-                modifyFlag = 1;//标志已修改
-            }
-            else
-            {
-                RAINBOW_RAISE(ExpectedIDefine);
-                return;
+                case 12://id
+                    tokenListAdd(token->token,atoll(idToken->token));
+                    modifyFlag = 1;//标志已修改
+                break;
+                case 13: //ignore
+                    tokenListAdd(token->token,RB_ignore);
+                    modifyFlag = 1;//标志已修改
+                break;
+                default:
+                    RAINBOW_RAISE(ExpectedIDefine);
+                    return;
+                break;
             }
             break;
         }
@@ -1373,7 +1378,7 @@ RainbowLexerPrivate(void) command_regSp()
     }
     switch(token->id) //string
     {
-        case 11:
+        case 11://string
         {
             RainbowCommandToken* idToken = RainbowCommanderNext();
             if(idToken==NULL)
@@ -1381,15 +1386,20 @@ RainbowLexerPrivate(void) command_regSp()
                 RAINBOW_RAISE(ExpectedIDefine);
                 return;
             }
-            if(idToken->id == 12)
+            switch (idToken->id)
             {
-                tokenListSpAdd(token->token,atoll(idToken->token));
-                modifySpFlag = 1;
-            }
-            else
-            {
-                RAINBOW_RAISE(ExpectedIDefine);
-                return;
+                case 12://id
+                    tokenListSpAdd(token->token,atoll(idToken->token));
+                    modifySpFlag = 1;//标志已修改
+                break;
+                case 13: //ignore
+                    tokenListSpAdd(token->token,RB_ignore);
+                    modifySpFlag = 1;//标志已修改
+                break;
+                default:
+                    RAINBOW_RAISE(ExpectedIDefine);
+                    return;
+                break;
             }
             break;
         }

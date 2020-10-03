@@ -272,9 +272,9 @@ RainbowLexerPublic(void) RainbowCommanderLex(const char *string)
             if (id >= 0)
                 RainbowRetAdd(buf, id);
 
-            else if (isalpha(*buf)  && (ID_VAR != -1) && (RainbowStatusCheekVarNameValidity(buf) != -1))
+            else if (isalpha(*buf) && (ID_VAR != -1) && (RainbowStatusCheekVarNameValidity(buf) != -1))
                 RainbowRetAdd(buf, ID_VAR);
-            else if (isdigit(*buf)  && (ID_NUM != -1) && (RainbowStatusCheekNumValidity(buf) != -1))
+            else if (isdigit(*buf) && (ID_NUM != -1) && (RainbowStatusCheekNumValidity(buf) != -1))
                 RainbowRetAdd(buf, ID_NUM);
             else if (*buf == '\0')
                 goto BUF_EMPTY_CASE_; //用于处理多个连续分隔符的情况
@@ -346,39 +346,39 @@ RainbowLexerPrivate(long long) RainbowStatusCheekOfStaticWordValidity(const char
     {
         switch (*token++)
         {
-            case 'o':
+        case 'o':
+        {
+            switch (*token++)
+            {
+            case 'm':
             {
                 switch (*token++)
                 {
-                    case 'm':
+                case 'p':
+                {
+                    switch (*token++)
+                    {
+                    case 'i':
                     {
                         switch (*token++)
+                        case 'l':
                         {
-                            case 'p':
+                            switch (*token++)
                             {
-                                switch (*token++)
-                                {
-                                    case 'i':
-                                    {
-                                        switch (*token++)
-                                        case 'l':
-                                        {
-                                            switch (*token++)
-                                            {
-                                                case 'e':
-                                                {
-                                                    if (*token == '\0')
-                                                    return 8;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                            case 'e':
+                            {
+                                if (*token == '\0')
+                                    return 8;
+                            }
                             }
                         }
                     }
+                    }
+                }
                 }
             }
+            }
+        }
         }
     }
     case 'D':
@@ -393,6 +393,66 @@ RainbowLexerPrivate(long long) RainbowStatusCheekOfStaticWordValidity(const char
             {
                 if (*token == '\0')
                     return 4;
+            }
+            default:
+            {
+                return -1;
+                break;
+            }
+            }
+        }
+        default:
+        {
+            return -1;
+            break;
+        }
+        }
+    }
+    case 'i':
+    {
+        switch (*token++)
+        {
+        case 'g':
+        {
+            switch (*token++)
+            {
+            case 'n':
+            {
+                switch (*token++)
+                {
+                case 'o':
+                {
+                    switch (*token++)
+                    {
+                    case 'r':
+                    {
+                        switch (*token++)
+                        {
+                        case 'e':
+                        {
+                            if (*token == '\0')
+                                return 13;
+                        }
+                        default:
+                        {
+                            return -1;
+                            break;
+                        }
+                        }
+                    }
+                    default:
+                    {
+                        return -1;
+                        break;
+                    }
+                    }
+                }
+                default:
+                {
+                    return -1;
+                    break;
+                }
+                }
             }
             default:
             {
